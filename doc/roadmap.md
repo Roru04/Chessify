@@ -43,7 +43,7 @@ language model.
 - Costs a small amount per explanation, so it should be optional and
   rate-limited.
 
-## Phase 3c — Learn tab (step 1 implemented 2026-11-11: tab, lesson player, practice, Italian Game)
+## Phase 3c — Learn tab (openings and middlegame tactics implemented 2026-11-11; endgame open)
 
 A separate **Learn** tab next to playing, with three sections:
 

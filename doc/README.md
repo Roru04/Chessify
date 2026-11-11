@@ -36,6 +36,9 @@ larger screens get an adapted two-column layout.
 | Move explanations (review only) | Implemented (2026-11-11) |
 | Weak levels: human-like play + opening book | Implemented (2026-11-11) |
 | Calibration of levels below 1320 | Trial run done, full run pending |
-| Learn tab: 5 openings (White: Italian, Ruy Lopez, Queen's Gambit, London; Black: Sicilian, Caro-Kann), "Is this opening for you?" profiles | Implemented (2026-11-11) |
+| Learn tab: 6 openings (White: Italian, Ruy Lopez, Queen's Gambit, London; Black: Sicilian, Caro-Kann), "Is this opening for you?" profiles | Implemented (2026-11-11) |
+| Learn tab: middlegame tactics (6 themes, lessons, 174 Lichess puzzles) | Implemented (2026-11-11) |
+| Right-click highlights and arrows on all boards | Implemented (2026-11-11) |
+| Learn tab: endgame | Planned |
 | Hosting | Live on GitHub Pages: https://roru04.github.io/Chessify/ |
 | AI explanations | Deferred, optional (see roadmap phase 3b) |

@@ -24,6 +24,7 @@ npm run preview   # serve the production build locally
 │   ├── copy-stockfish.mjs       # copies the engine into public/stockfish (runs before dev/build)
 │   ├── calibrate/calibrate.ts   # calibration matches for weak levels (npm run calibrate)
 │   ├── check-lessons/           # lesson quality check (npm run check:lessons)
+│   ├── puzzles/extract-puzzles.mjs # picks puzzles from the Lichess database (needs the .csv.zst download)
 │   └── lib/nodeEngine.ts        # runs the app's engine class in Node
 ├── public/stockfish/            # generated: stockfish-19-lite-single.js + .wasm
 ├── src/
@@ -49,12 +50,17 @@ npm run preview   # serve the production build locally
 │   ├── learn/
 │   │   ├── LearnScreen.tsx      # Learn tab: overview, course page, routing (lazy-loaded)
 │   │   ├── LessonPlayer.tsx     # step through a line with explanations
+│   │   ├── PuzzlePlayer.tsx     # tactics puzzles (Lichess format), hints, solution
 │   │   ├── PracticePlayer.tsx   # play one side, moves are checked
 │   │   ├── LearnBoard.tsx       # board with arrows, highlights, tap-to-move
 │   │   ├── pgnLesson.ts         # PGN + comments ([%cal], [%csl], [%mistake]) → lesson steps
 │   │   ├── progress.ts          # practice progress (Leitner boxes) in localStorage
 │   │   ├── learn.css
-│   │   └── courses/             # course data (italian.ts, …)
+│   │   ├── courses/             # opening courses (italian, ruyLopez, queensGambit, london, sicilian, caroKann), types, index
+│   │   └── middlegame/
+│   │       ├── themes.ts        # tactics themes: text, lesson PGN, puzzle lookup
+│   │       ├── puzzles.json     # 180 puzzles picked from the Lichess database (CC0)
+│   │       └── puzzleProgress.ts # puzzle results in localStorage
 │   ├── game/
 │   │   ├── useChessGame.ts      # game state (chess.js) + computer moves
 │   │   ├── settings.ts          # new-game settings, saved in localStorage
@@ -63,6 +69,7 @@ npm run preview   # serve the production build locally
 │       ├── Board.tsx            # react-chessboard with tap-to-move and highlights
 │       ├── PlayerBar.tsx            # name, Elo/status, captured pieces
 │       ├── CapturedPieces.tsx
+│       ├── useSquareMarks.ts    # right-click square highlights (all boards)
 │       ├── MoveList.tsx
 │       ├── NewGameSheet.tsx     # colour, exact Elo, think time
 │       ├── PromotionDialog.tsx
@@ -79,6 +86,15 @@ npm run preview   # serve the production build locally
 └── vite.config.ts
 ```
 
+
+## Updating the puzzles
+
+1. Download `https://database.lichess.org/lichess_db_puzzle.csv.zst`
+   (about 310 MB) to a folder outside the project.
+2. Run `node scripts/puzzles/extract-puzzles.mjs <path-to-.csv.zst> src/learn/middlegame/puzzles.json`.
+   It decompresses with the dev dependency `fzstd` while reading and stops as
+   soon as every theme is full (takes a few seconds).
+3. Run `npm run check:lessons`.
 
 ## Conventions
 

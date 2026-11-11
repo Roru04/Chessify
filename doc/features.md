@@ -129,7 +129,8 @@ start below the top bar, so the switch always stays usable. Pages have their own
 
 - **Overview:** split into **Openings for White** and **Openings for Black**.
   Each card shows the moves, a one-line style hint, the amount of theory and
-  progress. Middlegame and endgame are marked "coming soon".
+  progress. Then the **Middlegame: tactics** cards (see below). Endgame is
+  marked "coming soon".
 - **Course page:** moves, summary, an **"Is this opening for you?"** block
   (playing style it suits, why it's strong and against what, what to watch
   out for, amount of theory, suggested level), key ideas and the lines, each
@@ -144,19 +145,37 @@ start below the top bar, so the switch always stays usable. Pages have their own
 - **Progress** per line and side, saved in the browser: a perfect run moves
   the line up (New → Learning → Known → Mastered), any mistake sends it back
   to Learning.
-- **Content so far (21 lines, 367 moves):**
+- **Opening content so far (22 lines):**
   - For White: Italian Game (main line, Two Knights 4.d3, Fried Liver trap),
     Ruy Lopez (Closed, Berlin, Exchange), Queen's Gambit (QGD Exchange,
     QGA, Slav, Elephant Trap), London System (main line, vs King's Indian
     set-up, the early …Qb6).
   - For Black: Sicilian Defence (Najdorf, vs 2.c3 Alapin, vs 2.Nc3 Closed,
     vs 3.Bb5+), Caro-Kann Defence (Classical 4…Bf5, Advance 3.e5,
-    Exchange 3.exd5, smothered-mate trap after 4…Nd7 5.Qe2).
+    Exchange 3.exd5, against 2.Nc3 / 2.Nf3 Two Knights, smothered-mate trap
+    after 4…Nd7 5.Qe2). The Two Knights line was added last and has not been
+    through the Stockfish check yet.
   - Coming soon for Black: French, Queen's Gambit Declined, King's Indian.
-- **Quality check:** `npm run check:lessons` loads every lesson, checks that
-  all moves are legal and compares each move with Stockfish (depth 16):
-  normal moves may lose at most 0.7 pawns, moves marked as mistakes must lose
-  at least 1 pawn.
+- **Middlegame: tactics** (pages `#tactic-fork`, `#lesson-fork`,
+  `#puzzles-fork`, …). Six themes: hanging pieces, forks, pins, skewers,
+  discovered attacks, back-rank mates. Each theme has:
+  - a short text ("what to look for"),
+  - a **lesson**: a real puzzle position explained move by move,
+  - **29 puzzles** from the Lichess puzzle database (CC0), rated about
+    700–1900, easiest first. The opponent's first move is played
+    automatically, then you find the rest. Any checkmate counts as a
+    solution. A wrong move gives "Try again" and highlights the piece to
+    move; "Hint" and "Show solution" are available. After solving, a short
+    "Why it works" note (from the review's explanation rules). Each puzzle
+    links to its page on Lichess.
+  - Progress per puzzle in the browser ("clean" = solved at the first try);
+    the trainer continues with the first puzzle not yet solved cleanly.
+- **Quality check:** `npm run check:lessons` loads every opening line and
+  tactics lesson, checks that all moves are legal and compares each move with
+  Stockfish (depth 16): normal moves may lose at most 0.7 pawns, moves marked
+  as mistakes must lose at least 1 pawn. It also checks that all puzzle
+  solutions are legal. Last full run: 391 lesson moves, 0 problems (before
+  the Caro-Kann Two Knights line was added).
 
 ## 6. Game controls
 

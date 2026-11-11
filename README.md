@@ -16,6 +16,15 @@ to WebAssembly, so no server is needed.
 - **Game review**: every move graded (Best, Excellent, Good, Inaccuracy,
   Mistake, Blunder) with a plain-language explanation, accuracy per player,
   evaluation graph and move-by-move navigation.
+- **Learn tab**: opening courses for White and Black (Italian, Ruy Lopez,
+  Queen's Gambit, London, Sicilian, Caro-Kann) with explanations, practice
+  mode and "is this opening for you?" advice, plus middlegame tactics
+  (forks, pins, skewers, …) with lessons and puzzles.
+- **Board annotations**: right-click to highlight squares, right-drag to
+  draw arrows, like on chess.com.
+
+Puzzles come from the [Lichess puzzle database](https://database.lichess.org/#puzzles)
+(public domain, CC0).
 
 **Play it:** https://roru04.github.io/Chessify/
 
