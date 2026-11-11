@@ -50,6 +50,16 @@ during play.
 Option: **"Hide hints during my turn"** — analysis only shown after you move,
 so you can play first and compare afterwards.
 
+## 2b. Board annotations (all boards)
+
+Like on chess.com, on every board (play, review, lessons, practice, puzzles):
+
+- **Right-click a square** to highlight it (again to remove).
+- **Right-click and drag** to draw an arrow (Shift / Ctrl while drawing give
+  other colours).
+- **Left-click** on the board clears highlights and arrows; they also clear
+  after every move. Mouse only; phones have no right click.
+
 ## 3. Captured pieces
 
 Like on chess.com, each player bar shows the pieces that player has captured:
@@ -110,7 +120,45 @@ tab bar) opens a move-by-move review, similar to chess.com's Game Review.
   apply, the change in evaluation is described instead.
 - Not included yet: Brilliant, Great, Book and Miss classes.
 
-## 5. Game controls
+## 5. Learn tab
+
+A **Play | Learn** switch at the top. The running game stays loaded while
+you are in Learn. Pop-ups on the Play screen (new game, hints, result…)
+start below the top bar, so the switch always stays usable. Pages have their own addresses (`#learn`,
+`#learn-italian`, `#learn-italian-main`, `#practice-italian-main`).
+
+- **Overview:** split into **Openings for White** and **Openings for Black**.
+  Each card shows the moves, a one-line style hint, the amount of theory and
+  progress. Middlegame and endgame are marked "coming soon".
+- **Course page:** moves, summary, an **"Is this opening for you?"** block
+  (playing style it suits, why it's strong and against what, what to watch
+  out for, amount of theory, suggested level), key ideas and the lines, each
+  with Learn and Practice and a progress pill per side.
+- **Lesson:** step through a line (Start / Back / Next / End, arrow keys or
+  tap a move). Every move has an explanation; arrows and highlighted squares
+  show the ideas (arrows appear only in lessons, never in play). Deliberate
+  mistakes in trap lines get a "?" badge.
+- **Practice:** you play one side (White or Black), the app plays the other
+  and checks every move. A wrong move is taken back with "Try again"; after a
+  second wrong try an arrow shows the line move ("Show the move" also works).
+- **Progress** per line and side, saved in the browser: a perfect run moves
+  the line up (New → Learning → Known → Mastered), any mistake sends it back
+  to Learning.
+- **Content so far (21 lines, 367 moves):**
+  - For White: Italian Game (main line, Two Knights 4.d3, Fried Liver trap),
+    Ruy Lopez (Closed, Berlin, Exchange), Queen's Gambit (QGD Exchange,
+    QGA, Slav, Elephant Trap), London System (main line, vs King's Indian
+    set-up, the early …Qb6).
+  - For Black: Sicilian Defence (Najdorf, vs 2.c3 Alapin, vs 2.Nc3 Closed,
+    vs 3.Bb5+), Caro-Kann Defence (Classical 4…Bf5, Advance 3.e5,
+    Exchange 3.exd5, smothered-mate trap after 4…Nd7 5.Qe2).
+  - Coming soon for Black: French, Queen's Gambit Declined, King's Indian.
+- **Quality check:** `npm run check:lessons` loads every lesson, checks that
+  all moves are legal and compares each move with Stockfish (depth 16):
+  normal moves may lose at most 0.7 pawns, moves marked as mistakes must lose
+  at least 1 pawn.
+
+## 6. Game controls
 
 - New game
 - Undo (takes back your move and the computer's reply)

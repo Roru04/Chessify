@@ -3,6 +3,7 @@ import { Chessboard } from "react-chessboard";
 import type { Square } from "chess.js";
 import type { ChessGame } from "../game/useChessGame";
 import { CLASS_INFO, type MoveClass } from "../review/classify";
+import { useSquareMarks } from "./useSquareMarks";
 
 /** Read-only position shown in review mode instead of the live game. */
 export interface BoardView {
@@ -34,6 +35,9 @@ export function Board({ game, orientation, onPromotion, view }: Props) {
   const checkSquare = view ? view.checkSquare : game.checkSquare;
   const isPlayersTurn = !view && game.isPlayersTurn;
 
+  // Right-click highlights (cleared by a left click or a new position).
+  const marks = useSquareMarks(fen);
+
   // Clear the selection whenever the position changes.
   useEffect(() => setSelected(null), [fen]);
 
@@ -49,6 +53,7 @@ export function Board({ game, orientation, onPromotion, view }: Props) {
   }
 
   function onSquareClick({ square, piece }: { square: string; piece: { pieceType: string } | null }) {
+    marks.clear();
     const sq = square as Square;
     if (!isPlayersTurn) return setSelected(null);
     if (selected && targets.some((m) => m.to === sq)) {
@@ -68,10 +73,11 @@ export function Board({ game, orientation, onPromotion, view }: Props) {
       add(lastMove.to, { background: HL_LAST });
     }
     if (checkSquare) add(checkSquare, { background: CHECK });
+    for (const [sq, st] of Object.entries(marks.styles)) add(sq, st);
     if (selected) add(selected, { background: HL_SELECTED });
     for (const m of targets) add(m.to, { backgroundImage: m.captured ? RING : DOT });
     return styles;
-  }, [lastMove, checkSquare, selected, targets]);
+  }, [lastMove, checkSquare, selected, targets, marks.styles]);
 
   return (
     <div className="board" aria-label="Chess board">
@@ -81,7 +87,11 @@ export function Board({ game, orientation, onPromotion, view }: Props) {
           position: fen,
           boardOrientation: orientation,
           allowDragging: isPlayersTurn,
-          allowDrawingArrows: false,
+          // Right-drag draws arrows, right-click highlights a square, left-click clears both.
+          allowDrawingArrows: true,
+          clearArrowsOnClick: true,
+          clearArrowsOnPositionChange: true,
+          onSquareRightClick: ({ square }) => marks.toggle(square),
           animationDurationInMs: view ? 120 : 180,
           dragActivationDistance: 6,
           canDragPiece: ({ piece }) => isPlayersTurn && piece.pieceType[0] === playerColor,

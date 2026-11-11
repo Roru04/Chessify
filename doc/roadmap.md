@@ -43,6 +43,37 @@ language model.
 - Costs a small amount per explanation, so it should be optional and
   rate-limited.
 
+## Phase 3c — Learn tab (step 1 implemented 2026-11-11: tab, lesson player, practice, Italian Game)
+
+A separate **Learn** tab next to playing, with three sections:
+
+**Openings**
+- Builds on the existing opening book (`src/engine/openingBook.ts`): each
+  line gets its name (Italian Game, Sicilian Najdorf, Queen's Gambit, …) and
+  the main ideas in a few sentences (why each move, typical plans, common
+  traps).
+- Practice mode: you play one side of the line, the app answers with the
+  book moves and says when you leave the line (and what the book move was).
+- Repeat lines you got wrong more often (simple spaced repetition, stored in
+  the browser).
+
+**Middlegame**
+- Short lessons with board diagrams: forks, pins, skewers, discovered
+  attacks, double attacks, weak pawns, open files, outposts, king safety.
+- Puzzles for each theme ("find the best move"), checked by Stockfish. The
+  Lichess puzzle database is public domain (CC0), so a themed subset could
+  be bundled.
+
+**Endgame**
+- Basic mates: king + queen, king + rook, two bishops.
+- Pawn endings: opposition, the square rule, key squares.
+- Rook endings: Lucena and Philidor positions.
+- Each lesson ends with practice from the position against Stockfish
+  (full strength), so you have to actually win or hold the draw.
+
+Reuses: board, Stockfish, review explanations (`src/explain/`). Main work is
+writing the lesson content.
+
 ## Phase 4 — Comfort features
 
 - Save games locally (browser storage) and a game history list.

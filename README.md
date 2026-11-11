@@ -17,6 +17,8 @@ to WebAssembly, so no server is needed.
   Mistake, Blunder) with a plain-language explanation, accuracy per player,
   evaluation graph and move-by-move navigation.
 
+**Play it:** https://roru04.github.io/Chessify/
+
 ## Getting started
 
 Requires Node.js 20 or newer.

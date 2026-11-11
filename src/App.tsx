@@ -35,7 +35,8 @@ type Sheet = "new" | "resign" | "hints" | null;
 const initialSettings = loadSettings();
 const initialHints = loadHints();
 
-export default function App() {
+/** The Play screen. `active` is false while the Learn tab is shown (keys are then ignored). */
+export default function App({ active = true }: { active?: boolean }) {
   const game = useChessGame(initialSettings);
   const [sheet, setSheet] = useState<Sheet>("new");
   const [started, setStarted] = useState(false);
@@ -84,7 +85,7 @@ export default function App() {
   }
 
   useEffect(() => {
-    if (!reviewing) return;
+    if (!reviewing || !active) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement) return;
       const step: Record<string, (p: number) => number> = {
@@ -102,7 +103,7 @@ export default function App() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [reviewing, lastPly]);
+  }, [reviewing, lastPly, active]);
 
   let boardView: BoardView | undefined;
   if (reviewing) {

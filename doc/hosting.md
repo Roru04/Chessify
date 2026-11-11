@@ -4,6 +4,20 @@ The app is a **static site**: `npm run build` produces plain HTML, JS, CSS and
 the Stockfish `.wasm` file in `dist/`. The engine runs in the visitor's
 browser, so no server is needed. Any free static host works.
 
+## Current deployment: GitHub Pages
+
+Live at **https://roru04.github.io/Chessify/** (since 2026-11-11).
+
+- Repository `Roru04/Chessify` is public; Settings → Pages → Source:
+  "GitHub Actions".
+- `.github/workflows/deploy.yml` runs on every push to `main` (or manually
+  from the Actions tab): `npm ci`, `npm run build` (copies Stockfish,
+  type-checks, builds) and publishes `dist/`.
+- No extra account needed. The app uses relative paths and the
+  single-threaded Stockfish build, so it works under `/Chessify/` without
+  special server headers. Multi-threaded Stockfish would need COOP/COEP
+  headers, which GitHub Pages can't send (see below).
+
 ## Options
 
 | Host | Free tier | Custom response headers | Notes |

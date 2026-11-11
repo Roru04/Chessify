@@ -36,4 +36,6 @@ larger screens get an adapted two-column layout.
 | Move explanations (review only) | Implemented (2026-11-11) |
 | Weak levels: human-like play + opening book | Implemented (2026-11-11) |
 | Calibration of levels below 1320 | Trial run done, full run pending |
+| Learn tab: 5 openings (White: Italian, Ruy Lopez, Queen's Gambit, London; Black: Sicilian, Caro-Kann), "Is this opening for you?" profiles | Implemented (2026-11-11) |
+| Hosting | Live on GitHub Pages: https://roru04.github.io/Chessify/ |
 | AI explanations | Deferred, optional (see roadmap phase 3b) |

@@ -22,11 +22,14 @@ npm run preview   # serve the production build locally
 ├── doc/                         # this documentation + mockups
 ├── scripts/
 │   ├── copy-stockfish.mjs       # copies the engine into public/stockfish (runs before dev/build)
-│   └── calibrate/calibrate.ts   # calibration matches for weak levels (npm run calibrate)
+│   ├── calibrate/calibrate.ts   # calibration matches for weak levels (npm run calibrate)
+│   ├── check-lessons/           # lesson quality check (npm run check:lessons)
+│   └── lib/nodeEngine.ts        # runs the app's engine class in Node
 ├── public/stockfish/            # generated: stockfish-19-lite-single.js + .wasm
 ├── src/
 │   ├── main.tsx                 # entry point
-│   ├── App.tsx                  # layout, sheets, tab bar
+│   ├── Root.tsx                 # Play | Learn switch (hash routing)
+│   ├── App.tsx                  # Play screen: layout, sheets, tab bar
 │   ├── styles.css               # mobile-first styles, light/dark tokens
 │   ├── engine/
 │   │   ├── StockfishEngine.ts   # UCI wrapper around the Web Worker (queued searches)
@@ -43,6 +46,15 @@ npm run preview   # serve the production build locally
 │   │   └── useReview.ts         # analyses every position of a finished game
 │   ├── explain/
 │   │   └── explain.ts           # plain-language reasons for reviewed moves
+│   ├── learn/
+│   │   ├── LearnScreen.tsx      # Learn tab: overview, course page, routing (lazy-loaded)
+│   │   ├── LessonPlayer.tsx     # step through a line with explanations
+│   │   ├── PracticePlayer.tsx   # play one side, moves are checked
+│   │   ├── LearnBoard.tsx       # board with arrows, highlights, tap-to-move
+│   │   ├── pgnLesson.ts         # PGN + comments ([%cal], [%csl], [%mistake]) → lesson steps
+│   │   ├── progress.ts          # practice progress (Leitner boxes) in localStorage
+│   │   ├── learn.css
+│   │   └── courses/             # course data (italian.ts, …)
 │   ├── game/
 │   │   ├── useChessGame.ts      # game state (chess.js) + computer moves
 │   │   ├── settings.ts          # new-game settings, saved in localStorage
