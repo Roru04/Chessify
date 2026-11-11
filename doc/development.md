@@ -70,6 +70,7 @@ npm run preview   # serve the production build locally
 │       ├── PlayerBar.tsx            # name, Elo/status, captured pieces
 │       ├── CapturedPieces.tsx
 │       ├── useSquareMarks.ts    # right-click square highlights (all boards)
+│       ├── ThemeSwitch.tsx      # Auto / Light / Dark switch in the top bar
 │       ├── MoveList.tsx
 │       ├── NewGameSheet.tsx     # colour, exact Elo, think time
 │       ├── PromotionDialog.tsx

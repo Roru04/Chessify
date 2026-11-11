@@ -5,7 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#eef0f3" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#12151b" media="(prefers-color-scheme: dark)" />
-    <title>Chess Analyzer</title>
+    <title>Chessify</title>
+    <script>
+      // Apply the saved theme (Auto / Light / Dark) before the first paint.
+      try {
+        var t = localStorage.getItem("chess-analyzer.theme.v1");
+        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    </script>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♞</text></svg>" />
   </head>
   <body>

@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useState } from "react";
 import App from "./App";
+import { ThemeSwitch } from "./components/ThemeSwitch";
 
 // The Learn tab is loaded only when it is opened, so playing stays fast.
 const LearnScreen = lazy(() => import("./learn/LearnScreen"));
@@ -27,6 +28,7 @@ export default function Root() {
     <div className="root">
       <header className="topnav">
         <span className="brand">Chessify</span>
+        <ThemeSwitch />
         <nav className="navswitch" aria-label="Sections">
           <a href="#play" className={learn ? "" : "on"} aria-current={learn ? undefined : "page"}>
             Play

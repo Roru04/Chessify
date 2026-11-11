@@ -29,8 +29,10 @@
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   color-scheme: light;
 }
+/* Dark theme: follows the device ("Auto") unless the theme switch sets
+   data-theme="light" or "dark" on <html>. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #12151b;
     --surface: #1b1f28;
     --surface-2: #232834;
@@ -47,6 +49,23 @@
     --scrim: rgba(0, 0, 0, 0.55);
     color-scheme: dark;
   }
+}
+:root[data-theme="dark"] {
+  --bg: #12151b;
+  --surface: #1b1f28;
+  --surface-2: #232834;
+  --fg: #e7eaf0;
+  --muted: #98a0b2;
+  --line: #2e3442;
+  --accent: #6f9bff;
+  --accent-fg: #0d1220;
+  --accent-soft: #24304a;
+  --sq-light: #cfc6b3;
+  --sq-dark: #7a6750;
+  --good: #4cc27f;
+  --bad: #ef7a64;
+  --scrim: rgba(0, 0, 0, 0.55);
+  color-scheme: dark;
 }
 
 *,
@@ -112,6 +131,29 @@ h2 {
   font-weight: 700;
   font-size: 16px;
   letter-spacing: -0.01em;
+}
+.brand {
+  margin-right: auto;
+}
+.theme-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  border-radius: 10px;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.theme-switch:hover {
+  color: var(--fg);
+}
+@media (max-width: 420px) {
+  .theme-switch span {
+    display: none;
+  }
 }
 .navswitch {
   display: flex;

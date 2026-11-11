@@ -442,26 +442,41 @@ a.btn {
 }
 
 @media (min-width: 768px) {
+  /* Same geometry as the Play screen (styles.css): same board size formula,
+     300px column beside the board, 16px/24px padding, bottom bar below the
+     centred area. The breadcrumb floats so it doesn't push the board down. */
+  .learn {
+    position: relative;
+  }
+  .learn > .crumbs {
+    position: absolute;
+    top: 8px;
+    left: 24px;
+    z-index: 1;
+    padding: 0;
+  }
   .learn-play {
+    --learn-board: min(820px, calc(100dvh - 220px - var(--nav-h)), calc(100vw - 400px));
     display: grid;
-    grid-template-columns: auto minmax(300px, 380px);
-    grid-template-rows: 1fr auto;
+    grid-template-columns: var(--learn-board) 300px;
+    grid-template-rows: minmax(0, 1fr) auto;
     grid-template-areas: "board panel" "nav nav";
     justify-content: center;
-    gap: 0 24px;
-    padding: 8px 24px 16px;
+    align-items: center;
+    gap: 16px 24px;
+    padding: 16px 24px 0;
   }
   .learn-board-col {
     grid-area: board;
-    align-items: flex-start;
   }
   .learn-board {
-    /* as large as the window allows: height minus top bar, breadcrumb and bottom bar; width minus the explanation column */
-    width: min(820px, calc(100dvh - var(--nav-h) - 150px), calc(100vw - 440px));
+    width: var(--learn-board);
   }
   .learn-panel {
     grid-area: panel;
     padding: 4px 0 12px;
+    /* exactly as tall as the board; longer text scrolls inside */
+    height: var(--learn-board);
   }
   /* centred across the bottom, like the Play screen's bar */
   .learn-nav {
@@ -469,7 +484,7 @@ a.btn {
     justify-self: center;
     width: 100%;
     max-width: 520px;
-    margin: 12px 0 0;
+    margin: 0 0 8px;
   }
 }
 

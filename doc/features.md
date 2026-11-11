@@ -50,6 +50,13 @@ during play.
 Option: **"Hide hints during my turn"** — analysis only shown after you move,
 so you can play first and compare afterwards.
 
+## 2c. Light and dark theme
+
+A switch in the top bar cycles **Auto** (follows the device setting) →
+**Light** → **Dark**. The choice is saved in the browser and applied before
+the first paint (inline script in `index.html`), so there is no flash of the
+wrong theme. On narrow phones the switch shows only its icon.
+
 ## 2b. Board annotations (all boards)
 
 Like on chess.com, on every board (play, review, lessons, practice, puzzles):
