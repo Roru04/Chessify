@@ -1,0 +1,413 @@
+<title>Chess Analyzer Mockups</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: a row of phone frames (mobile first), each a real screen of the app, with annotations underneath. */
+:root {
+  --bg: #eef0f3;
+  --surface: #ffffff;
+  --surface-2: #f4f5f8;
+  --fg: #1a1f2b;
+  --muted: #5d6577;
+  --line: #d9dde5;
+  --accent: #2a62d8;
+  --accent-soft: #e3ebfb;
+  --sq-light: #e8e1d2;
+  --sq-dark: #8f7a5f;
+  --sq-hl: rgba(232, 196, 64, .55);
+  --arrow: rgba(42, 98, 216, .78);
+  --eval-white: #f7f7f5;
+  --eval-black: #23262d;
+  --good: #1f8a4c;
+  --bad: #c2412d;
+  --frame: #1a1f2b;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12151b; --surface: #1b1f28; --surface-2: #232834; --fg: #e7eaf0; --muted: #98a0b2;
+  --line: #2e3442; --accent: #6f9bff; --accent-soft: #24304a; --sq-light: #cfc6b3; --sq-dark: #7a6750;
+  --arrow: rgba(111, 155, 255, .85); --frame: #000; --good: #4cc27f; --bad: #ef7a64; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #12151b; --surface: #1b1f28; --surface-2: #232834; --fg: #e7eaf0; --muted: #98a0b2;
+  --line: #2e3442; --accent: #6f9bff; --accent-soft: #24304a; --sq-light: #cfc6b3; --sq-dark: #7a6750;
+  --arrow: rgba(111, 155, 255, .85); --frame: #000; --good: #4cc27f; --bad: #ef7a64; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); line-height: 1.5;
+  padding-block: 32px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1560px; margin: 0 auto; display: grid; gap: 32px; }
+header h1 { font-family: var(--font-display); font-size: 2rem; margin: 0; text-wrap: balance; }
+header p { margin: 4px 0 0; color: var(--muted); max-width: 65ch; }
+.screens { display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start; }
+figure { margin: 0; width: min(360px, 100%); display: grid; gap: 12px; }
+figcaption h2 { font-family: var(--font-display); font-size: 1.05rem; margin: 0; }
+figcaption ul { margin: 6px 0 0; padding-left: 18px; color: var(--muted); font-size: .9rem; }
+
+/* phone */
+.phone {
+  border: 10px solid var(--frame); border-radius: 36px; background: var(--surface);
+  aspect-ratio: 9 / 19.5; max-width: 100%; overflow: hidden; position: relative;
+  display: flex; flex-direction: column;
+}
+.status { height: 26px; flex: none; display: flex; justify-content: space-between; padding: 6px 20px 0; font-size: 11px; font-weight: 600; }
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; gap: 8px; }
+.player { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.avatar { width: 28px; height: 28px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); display: grid; place-items: center; font-size: 16px; flex: none; }
+.pname { font-weight: 600; font-size: 13px; line-height: 1.2; }
+.pline { display: flex; align-items: baseline; gap: 6px; }
+.botbar { padding: 4px 14px; }
+.avatar.sw-w { background: #f7f7f5; } .avatar.sw-b { background: #23262d; }
+.caps { display: flex; align-items: center; height: 15px; margin-top: 1px; }
+.cg { display: flex; margin-right: 4px; font-size: 14px; line-height: 1; }
+.cg i { font-style: normal; } .cg i + i { margin-left: -6px; }
+.cg.w i { color: #fff; -webkit-text-stroke: 0.8px #222; } .cg.b i { color: #15171c; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cg.b i { color: #15171c; -webkit-text-stroke: 0.6px #aaa; } }
+:root[data-theme="dark"] .cg.b i { -webkit-text-stroke: 0.6px #aaa; }
+.adv { font-size: 11px; font-weight: 600; color: var(--muted); }
+.psub { font-size: 11px; color: var(--muted); line-height: 1.2; }
+.chip { font-size: 11px; padding: 2px 8px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); font-weight: 600; white-space: nowrap; }
+
+/* eval bar (horizontal on mobile) */
+.evalrow { display: flex; align-items: center; gap: 8px; padding: 0 14px 6px; }
+.evalbar { flex: 1; height: 10px; border-radius: 99px; overflow: hidden; display: flex; border: 1px solid var(--line); background: var(--eval-black); }
+.evalbar span { background: var(--eval-white); }
+.evalnum { font-family: var(--font-mono); font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; min-width: 40px; text-align: right; }
+
+/* board */
+.board { position: relative; width: 100%; aspect-ratio: 1; flex: none; }
+.board .grid { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); }
+.sq { position: relative; display: grid; place-items: center; font-size: clamp(20px, 7.6vw, 34px); line-height: 1; }
+.sq.l { background: var(--sq-light); } .sq.d { background: var(--sq-dark); }
+.sq.hl::before { content: ""; position: absolute; inset: 0; background: var(--sq-hl); }
+.sq.dot::after { content: ""; width: 28%; height: 28%; border-radius: 50%; background: rgba(0,0,0,.22); position: absolute; }
+.pc { position: relative; z-index: 1; }
+.pc.w { color: #fff; -webkit-text-stroke: 1.2px #222; }
+.pc.b { color: #15171c; }
+.coord { position: absolute; font-size: 8px; font-weight: 600; font-family: var(--font-mono); }
+.coord.f { bottom: 1px; right: 2px; } .coord.r { top: 1px; left: 2px; }
+.sq.l .coord { color: var(--sq-dark); } .sq.d .coord { color: var(--sq-light); }
+.board svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
+
+/* panels */
+.panel { padding: 8px 14px; display: grid; gap: 6px; }
+.label { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; }
+.line { display: grid; grid-template-columns: 46px 1fr; gap: 8px; align-items: baseline; font-size: 12px; }
+.line .ev { font-family: var(--font-mono); font-weight: 500; font-variant-numeric: tabular-nums; text-align: center; border-radius: 4px; padding: 1px 0; background: var(--surface-2); }
+.line.best .ev { background: var(--accent); color: #fff; }
+.line .pv { font-family: var(--font-mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
+.line .pv b { color: var(--fg); font-weight: 600; }
+.moves { display: flex; gap: 10px; overflow: hidden; font-family: var(--font-mono); font-size: 12px; white-space: nowrap; padding: 6px 14px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface-2); }
+.moves .n { color: var(--muted); }
+.moves .cur { background: var(--accent-soft); color: var(--accent); border-radius: 4px; padding: 0 4px; font-weight: 600; }
+.spacer { flex: 1; }
+.tabbar { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--line); padding: 6px 4px 14px; flex: none; }
+.tab { display: grid; justify-items: center; gap: 2px; font-size: 10px; color: var(--muted); }
+.tab i { font-style: normal; font-size: 17px; line-height: 1.2; color: var(--fg); }
+.tab.on, .tab.on i { color: var(--accent); }
+
+/* bottom sheet */
+.dim { position: absolute; inset: 0; background: rgba(10, 12, 18, .45); z-index: 5; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 6; background: var(--surface); border-radius: 18px 18px 0 0; padding: 10px 16px 20px; display: grid; gap: 14px; }
+.grab { width: 36px; height: 4px; border-radius: 99px; background: var(--line); justify-self: center; }
+.sheet h3 { margin: 0; font-family: var(--font-display); font-size: 1.15rem; }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.seg div { border: 1px solid var(--line); border-radius: 10px; padding: 8px 4px; text-align: center; font-size: 12px; font-weight: 500; display: grid; gap: 2px; }
+.seg div span { font-size: 20px; line-height: 1; }
+.seg .on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.field { display: grid; gap: 6px; }
+.field .label { font-size: 11px; }
+.slider { height: 6px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--line); position: relative; }
+.slider span { position: absolute; inset: 0 auto 0 0; border-radius: 99px; background: var(--accent); }
+.slider i { position: absolute; top: 50%; width: 20px; height: 20px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); transform: translate(-50%, -50%); }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.presets span { font-size: 11px; padding: 3px 9px; border-radius: 99px; border: 1px solid var(--line); }
+.presets .on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+.elo { display: flex; align-items: center; gap: 10px; }
+.elo .num { font-family: var(--font-mono); font-size: 18px; font-weight: 500; border: 1.5px solid var(--accent); border-radius: 8px; padding: 4px 10px; min-width: 76px; text-align: center; font-variant-numeric: tabular-nums; }
+.elo .slider { flex: 1; }
+.range { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+.hint { font-size: 11px; color: var(--muted); line-height: 1.35; }
+.ex-head { display: flex; align-items: baseline; gap: 10px; }
+.ex-head .mv { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; }
+.ex-head .ev { font-family: var(--font-mono); font-size: 13px; background: var(--accent); color: #fff; border-radius: 4px; padding: 1px 6px; }
+.ex-text { font-size: 14px; line-height: 1.5; margin: 0; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tags span { font-size: 11px; padding: 2px 8px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--line); }
+.alt { display: grid; gap: 6px; font-size: 12px; }
+.alt div { display: grid; grid-template-columns: 46px 1fr; gap: 8px; align-items: baseline; }
+.alt .ev { font-family: var(--font-mono); text-align: center; border-radius: 4px; background: var(--surface-2); }
+.pvline { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.btn { background: var(--accent); color: #fff; border-radius: 12px; padding: 12px; text-align: center; font-weight: 600; font-size: 14px; }
+.btn.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); }
+.toggle { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.toggle small { display: block; color: var(--muted); font-size: 11px; line-height: 1.3; }
+.sw { width: 36px; height: 20px; border-radius: 99px; background: var(--line); position: relative; flex: none; }
+.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--surface); }
+.sw.on { background: var(--accent); } .sw.on::after { left: 18px; }
+
+/* result card */
+.result { position: absolute; left: 14px; right: 14px; top: 34%; z-index: 6; background: var(--surface); border-radius: 16px; padding: 18px; display: grid; gap: 10px; text-align: center; box-shadow: 0 12px 40px rgba(0,0,0,.3); }
+.result .big { font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
+.result .score { font-family: var(--font-mono); font-size: 1.1rem; color: var(--muted); }
+.result .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* review screen */
+.c-best { --c: #4f9a3a; } .c-excellent { --c: #6aab47; } .c-good { --c: #7f9a72; }
+.c-inaccuracy { --c: #e2b007; } .c-mistake { --c: #ec8526; } .c-blunder { --c: #d63b2c; }
+.mbadge { position: absolute; top: -14%; right: -14%; width: 50%; height: 50%; border-radius: 50%; background: var(--c); color: #fff; border: 1.5px solid #fff; display: grid; place-items: center; font: 800 10px/1 var(--font-body); z-index: 3; box-shadow: 0 1px 3px rgba(0,0,0,.35); }
+.rv { padding: 8px 14px; display: grid; gap: 8px; overflow: hidden; flex: 1; min-height: 0; border-top: 1px solid var(--line); }
+.rv-card { display: flex; gap: 10px; align-items: flex-start; }
+.rv-card p { margin: 0; }
+.rbadge { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--c); color: #fff; font: 800 11px/1 var(--font-body); flex: none; }
+.rbadge.sm { width: 15px; height: 15px; font-size: 8px; margin-right: 6px; vertical-align: -3px; }
+.rv-title { font-size: 13px; }
+.rv-sub { font-size: 10px; color: var(--muted); }
+.rv-why { font-size: 11px; line-height: 1.4; }
+.rv-why .good { color: #4f9a3a; }
+.rv-graph { position: relative; height: 44px; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
+.rv-graph svg { display: block; width: 100%; height: 100%; }
+.gdot { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: var(--c); border: 1.5px solid #fff; transform: translate(-50%, -50%); }
+.rv-sum { width: 100%; border-collapse: collapse; font-size: 11px; }
+.rv-sum th { font-size: 9px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); text-align: right; font-weight: 600; }
+.rv-sum td { padding: 2px 0; border-bottom: 1px solid var(--line); }
+.rv-sum td + td { text-align: right; font-family: var(--font-mono); width: 28%; }
+.rv-sum tr.acc td { font-size: 14px; font-weight: 700; font-family: var(--font-body); }
+.notes { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 20px; max-width: 80ch; }
+.notes h2 { font-family: var(--font-display); font-size: 1.1rem; margin: 0 0 6px; }
+.notes ul { margin: 0; padding-left: 18px; color: var(--muted); }
+.notes b { color: var(--fg); font-weight: 600; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Chess Analyzer · mobile mockups</h1>
+    <p>Version 1 screens at phone width (360 px). The board always spans the full width; everything else is stacked above and below it so it can be used with one thumb. Updated 2026-11-11: captured pieces in the player bars, no best-move arrow, Resign in the tab bar, game review with move grades and explanations.</p>
+  </header>
+
+  <div class="screens">
+    <!-- 1. Play -->
+    <figure>
+      <div class="phone" id="s1">
+        <div class="status"><span>9:41</span><span>●●● 82%</span></div>
+        <div class="topbar">
+          <div class="player"><div class="avatar sw-b"></div><div><div class="pline"><span class="pname">Stockfish</span><span class="psub">1600 Elo</span></div><div class="caps"><span class="cg w"><i>♟&#xFE0E;</i></span><span class="cg w"><i>♝&#xFE0E;</i></span></div></div></div>
+          <span class="chip">Thinking…</span>
+        </div>
+        <div class="evalrow"><div class="evalbar"><span style="width:50%"></span></div><div class="evalnum">0.00</div></div>
+        <div class="board" data-fen="r1bqkbnr/1pp3pp/p1p2p2/8/3NP3/8/PPP2PPP/RNBQ1RK1" data-hl="f3,d4"></div>
+        <div class="botbar"><div class="player"><div class="avatar sw-w"></div><div><div class="pline"><span class="pname">You</span><span class="psub">Waiting for Stockfish</span></div><div class="caps"><span class="cg b"><i>♟&#xFE0E;</i></span><span class="cg b"><i>♞&#xFE0E;</i></span></div></div></div></div>
+        <div class="moves"><span><span class="n">5.</span> O-O f6</span><span><span class="n">6.</span> d4 exd4</span><span><span class="n">7.</span> <span class="cur">Nxd4</span></span></div>
+        <div class="panel">
+          <div class="label"><span>Best moves</span><span>depth 18</span></div>
+          <div class="line best"><span class="ev">0.00</span><span class="pv"><b>7… c5</b> 8. Nb3 Qxd1 9. Rxd1 Be6</span></div>
+          <div class="line"><span class="ev">+0.21</span><span class="pv"><b>7… Qd6</b> 8. Be3 Bd7 9. Nd2 O-O-O</span></div>
+          <div class="line"><span class="ev">+0.37</span><span class="pv"><b>7… Ne7</b> 8. Be3 Ng6 9. Nc3 Bc5</span></div>
+        </div>
+        <div class="spacer"></div>
+        <div class="tabbar">
+          <div class="tab"><i>＋</i>New</div><div class="tab"><i>↶</i>Undo</div><div class="tab"><i>⇅</i>Flip</div><div class="tab on"><i>◉</i>Hints</div><div class="tab"><i>⚑</i>Resign</div>
+        </div>
+      </div>
+      <figcaption><h2>Play screen</h2><ul>
+        <li>On phones the eval bar is horizontal above the board. On desktop it becomes vertical next to the board. It glides slowly to new values and shows forced mates up to M8.</li>
+        <li>Each player bar shows the pieces that player has captured, grouped by type. The side that is ahead in material gets a “+N”. Here material is even: White took a pawn and a knight, Black took a pawn and a bishop.</li>
+        <li>Top 3 lines with evaluation and depth. No arrow on the board.</li>
+        <li>Move list scrolls sideways; the current move is highlighted.</li>
+      </ul></figcaption>
+    </figure>
+
+    <!-- 2. New game -->
+    <figure>
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>●●● 82%</span></div>
+        <div class="topbar"><div class="player"><div class="avatar">⚙</div><div><div class="pname">Stockfish</div><div class="psub">1600 Elo</div></div></div></div>
+        <div class="evalrow"><div class="evalbar"><span style="width:50%"></span></div><div class="evalnum">0.00</div></div>
+        <div class="board" data-fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"></div>
+        <div class="dim"></div>
+        <div class="sheet">
+          <div class="grab"></div>
+          <h3>New game</h3>
+          <div class="field"><div class="label"><span>Play as</span></div>
+            <div class="seg"><div class="on"><span>♔</span>White</div><div><span>⚄</span>Random</div><div><span>♚</span>Black</div></div>
+          </div>
+          <div class="field"><div class="label"><span>Opponent Elo</span></div>
+            <div class="elo"><div class="num">1600</div><div class="slider"><span style="width:52%"></span><i style="left:52%"></i></div></div>
+            <div class="range"><span>100</span><span>3000</span></div>
+            <div class="presets"><span>Beginner 400</span><span>Casual 800</span><span>Club 1200</span><span>Strong 1800</span><span>Master 2400</span><span>Max 3000</span></div>
+          </div>
+          <div class="field"><div class="label"><span>Time per computer move</span><span>1.0 s</span></div>
+            <div class="slider"><span style="width:20%"></span><i style="left:20%"></i></div>
+          </div>
+          <div class="btn">Start game</div>
+        </div>
+      </div>
+      <figcaption><h2>New game sheet</h2><ul>
+        <li>A bottom sheet keeps the controls within thumb reach.</li>
+        <li>Choose White or Black (or Random). As Black, the board is turned around and the computer moves first.</li>
+        <li>Type an exact Elo from 100 to 3000, or use the slider and presets.</li>
+        <li>From 1320 up, Stockfish's own Elo limit is used. Below that, the app weakens the engine itself, so the rating is an approximation.</li>
+        <li>The last settings are remembered in the browser.</li>
+      </ul></figcaption>
+    </figure>
+
+    <!-- 3. Hints settings -->
+    <figure>
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>●●● 82%</span></div>
+        <div class="topbar"><div class="player"><div class="avatar">⚙</div><div><div class="pname">Stockfish</div><div class="psub">1600 Elo</div></div></div></div>
+        <div class="evalrow"><div class="evalbar"><span style="width:54%"></span></div><div class="evalnum">+0.35</div></div>
+        <div class="board" data-fen="r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R" data-hl="b5" data-dots="a4,c4,d3,e2,f1,a6,c6"></div>
+        <div class="dim"></div>
+        <div class="sheet">
+          <div class="grab"></div>
+          <h3>Hints</h3>
+          <div>
+            <div class="toggle"><span>Evaluation bar</span><span class="sw on"></span></div>
+            <div class="toggle"><span>Best moves list</span><span class="sw on"></span></div>
+            <div class="toggle"><span>Hide hints on my turn<small>Make your move first, then compare it with the engine.</small></span><span class="sw"></span></div>
+          </div>
+          <div class="field"><div class="label"><span>Lines shown</span><span>3</span></div>
+            <div class="seg"><div>1</div><div>2</div><div class="on">3</div></div>
+          </div>
+        </div>
+      </div>
+      <figcaption><h2>Hints sheet</h2><ul>
+        <li>Each hint can be switched on or off separately, and the change applies straight away.</li>
+        <li>Behind the sheet: tap-to-move. Tap a piece, and dots show its legal squares. On touch screens this is easier than dragging.</li>
+      </ul></figcaption>
+    </figure>
+
+    <!-- 4. Game over -->
+    <figure>
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>●●● 82%</span></div>
+        <div class="topbar"><div class="player"><div class="avatar">⚙</div><div><div class="pname">Stockfish</div><div class="psub">1600 Elo</div></div></div></div>
+        <div class="evalrow"><div class="evalbar"><span style="width:100%"></span></div><div class="evalnum">1-0</div></div>
+        <div class="board" data-fen="r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR" data-hl="h5,f7"></div>
+        <div class="botbar"><div class="player"><div class="avatar sw-w"></div><div><div class="pline"><span class="pname">You</span><span class="psub">Game over</span></div><div class="caps"><span class="cg b"><i>♟&#xFE0E;</i></span><span class="adv">+1</span></div></div></div></div>
+        <div class="moves"><span><span class="n">2.</span> Bc4 Nc6</span><span><span class="n">3.</span> Qh5 Nf6??</span><span><span class="n">4.</span> <span class="cur">Qxf7#</span></span></div>
+        <div class="dim"></div>
+        <div class="result">
+          <div class="big">Checkmate. You win</div>
+          <div class="score">1 – 0 · 4 moves</div>
+          <div class="btn">Review game</div>
+          <div class="btns"><div class="btn ghost">New game</div><div class="btn ghost">Rematch</div></div>
+        </div>
+      </div>
+      <figcaption><h2>Game over</h2><ul>
+        <li>Shows the result and the reason: checkmate, stalemate, repetition, 50-move rule or insufficient material.</li>
+        <li>“Review game” opens the move-by-move review (next screen). Tapping outside the card just shows the board; “Review” is then in the tab bar.</li>
+      </ul></figcaption>
+    </figure>
+
+    <!-- 5. Game review -->
+    <figure>
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>●●● 82%</span></div>
+        <div class="topbar"><div class="player"><div class="avatar sw-b"></div><div><div class="pline"><span class="pname">Stockfish</span><span class="psub">1600 Elo</span></div><div class="caps"></div></div></div></div>
+        <div class="evalrow"><div class="evalbar"><span style="width:100%"></span></div><div class="evalnum">M1</div></div>
+        <div class="board" data-fen="r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR" data-hl="g8,f6" data-badge="f6:??:blunder"></div>
+        <div class="botbar"><div class="player"><div class="avatar sw-w"></div><div><div class="pline"><span class="pname">You</span><span class="psub">Game review</span></div><div class="caps"></div></div></div></div>
+        <div class="rv">
+          <div class="rv-card">
+            <span class="rbadge c-blunder">??</span>
+            <div>
+              <p class="rv-title"><b>3… Nf6</b> is a blunder</p>
+              <p class="rv-sub">Stockfish's move · eval M1 · −53% win chance</p>
+              <p class="rv-why">It allows mate in one: White plays Qxf7#.</p>
+              <p class="rv-why">Best was <b class="good">Qe7</b>: keeps the position balanced.</p>
+            </div>
+          </div>
+          <div class="rv-graph">
+            <svg viewBox="0 0 300 64" preserveAspectRatio="none" aria-hidden="true">
+              <rect width="300" height="64" fill="#2a2d35"/>
+              <path d="M0,30.5 L42.9,30.6 L85.7,30.4 L128.6,32 L171.4,31 L214.3,34 L257.1,0 L300,0 L300,64 L0,64 Z" fill="#f7f7f5"/>
+              <line x1="0" y1="32" x2="300" y2="32" stroke="#8a90a0" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>
+              <line x1="257.1" y1="0" x2="257.1" y2="64" stroke="var(--accent)" stroke-width="2" vector-effect="non-scaling-stroke"/>
+            </svg>
+            <span class="gdot c-blunder" style="left:85.7%;top:4%"></span>
+          </div>
+          <table class="rv-sum">
+            <tr><th></th><th>You</th><th>Stockfish</th></tr>
+            <tr class="acc"><td>Accuracy</td><td>92.9</td><td>44.0</td></tr>
+            <tr><td><span class="rbadge sm c-best">★</span>Best</td><td>2</td><td>1</td></tr>
+            <tr><td><span class="rbadge sm c-excellent">!</span>Excellent</td><td>0</td><td>1</td></tr>
+            <tr><td><span class="rbadge sm c-good">✓</span>Good</td><td>2</td><td>0</td></tr>
+            <tr><td><span class="rbadge sm c-blunder">??</span>Blunder</td><td>0</td><td>1</td></tr>
+          </table>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><i>⏮</i>Start</div><div class="tab"><i>‹</i>Back</div><div class="tab"><i>›</i>Next</div><div class="tab"><i>⏭</i>End</div><div class="tab"><i>✕</i>Done</div>
+        </div>
+      </div>
+      <figcaption><h2>Game review</h2><ul>
+        <li>Opens from “Review game” after the game. Stockfish analyses every position (depth 14); a progress bar shows how far it is.</li>
+        <li>The board shows the selected position with a grade badge on the moved piece: ★ Best, ! Excellent, ✓ Good, ?! Inaccuracy, ? Mistake, ?? Blunder.</li>
+        <li>The card explains the move in plain words and, for weaker moves, what the best move would have done. Explanations only appear here, never during play.</li>
+        <li>Evaluation graph (tap to jump), accuracy and grade counts per player, and the move list with marks follow below (scroll).</li>
+        <li>Step through with Start / Back / Next / End or the arrow keys.</li>
+      </ul></figcaption>
+    </figure>
+  </div>
+
+  <section class="notes">
+    <h2>Layout on larger screens</h2>
+    <ul>
+      <li><b>Tablet, 768 px and up:</b> the board and a vertical eval bar sit on the left. The best moves and the move list form a column on the right.</li>
+      <li><b>Desktop:</b> the same layout, but the board grows to about 640 px. In the review the right column holds the move card, graph, accuracy table and move list; arrow keys step through moves.</li>
+      <li><b>Touch targets:</b> at least 44 px. Squares on a 360 px screen are 45 px.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+const GLYPH = { k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟" };
+const FILES = "abcdefgh";
+function sqXY(s) { return [FILES.indexOf(s[0]) + 0.5, 8 - Number(s[1]) + 0.5]; }
+document.querySelectorAll(".board").forEach(function (el) {
+  const rows = el.dataset.fen.split("/");
+  const hl = (el.dataset.hl || "").split(",");
+  const dots = (el.dataset.dots || "").split(",");
+  const badge = (el.dataset.badge || "").split(":"); // square:symbol:class
+  const grid = document.createElement("div");
+  grid.className = "grid";
+  rows.forEach(function (row, r) {
+    let f = 0;
+    for (const ch of row) {
+      if (/\d/.test(ch)) { for (let i = 0; i < +ch; i++) grid.appendChild(cell(r, f++, null)); }
+      else grid.appendChild(cell(r, f++, ch));
+    }
+  });
+  function cell(r, f, p) {
+    const name = FILES[f] + (8 - r);
+    const d = document.createElement("div");
+    d.className = "sq " + ((r + f) % 2 ? "d" : "l") + (hl.includes(name) ? " hl" : "") + (dots.includes(name) ? " dot" : "");
+    if (p) {
+      const s = document.createElement("span");
+      s.className = "pc " + (p === p.toUpperCase() ? "w" : "b");
+      s.textContent = GLYPH[p.toLowerCase()] + "︎";
+      d.appendChild(s);
+    }
+    if (badge[0] === name) d.insertAdjacentHTML("beforeend", '<span class="mbadge c-' + badge[2] + '">' + badge[1] + "</span>");
+    if (r === 7) d.insertAdjacentHTML("beforeend", '<span class="coord f">' + FILES[f] + "</span>");
+    if (f === 0) d.insertAdjacentHTML("beforeend", '<span class="coord r">' + (8 - r) + "</span>");
+    return d;
+  }
+  el.appendChild(grid);
+  if (el.dataset.arrow) {
+    const [a, b] = el.dataset.arrow.split(",").map(sqXY);
+    const dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy);
+    const ex = b[0] - dx / len * 0.32, ey = b[1] - dy / len * 0.32;
+    el.insertAdjacentHTML("beforeend",
+      '<svg viewBox="0 0 8 8" aria-hidden="true"><defs><marker id="ah" markerWidth="3" markerHeight="3" refX="1.5" refY="1.5" orient="auto"><path d="M0,0 L3,1.5 L0,3 z" fill="var(--arrow)"/></marker></defs>' +
+      '<line x1="' + a[0] + '" y1="' + a[1] + '" x2="' + ex + '" y2="' + ey + '" stroke="var(--arrow)" stroke-width="0.17" stroke-linecap="round" marker-end="url(#ah)"/></svg>');
+  }
+});
+</script>
