@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Chess, type Color, type Move, type Square } from "chess.js";
 import { getOpponentEngine as getEngine } from "../engine/engines";
+import { levelById } from "../engine/levels";
 import { chooseComputerMove } from "../engine/strength";
 import { splitUciMove } from "../engine/uci";
 import type { GameSettings } from "./settings";
@@ -41,7 +42,6 @@ export function useChessGame(initial: GameSettings) {
   const [thinking, setThinking] = useState(false);
   const [resignedBy, setResignedBy] = useState<Color | null>(null);
   const [engineStatus, setEngineStatus] = useState<EngineStatus>("loading");
-  const [limiterMin, setLimiterMin] = useState(1320);
 
   useEffect(() => {
     let alive = true;
@@ -49,7 +49,6 @@ export function useChessGame(initial: GameSettings) {
     engine.ready
       .then(() => {
         if (!alive) return;
-        setLimiterMin(engine.eloRange.min);
         setEngineStatus("ready");
       })
       .catch(() => alive && setEngineStatus("error"));
@@ -71,8 +70,8 @@ export function useChessGame(initial: GameSettings) {
     const id = gameIdRef.current;
     setThinking(true);
     try {
-      const { elo, thinkMs } = settingsRef.current;
-      const uci = await chooseComputerMove(getEngine(), new Chess(game.fen()), elo, thinkMs);
+      const { level, thinkMs } = settingsRef.current;
+      const uci = await chooseComputerMove(getEngine(), new Chess(game.fen()), levelById(level), thinkMs);
       if (id !== gameIdRef.current || !uci) return;
       game.move(splitUciMove(uci));
       rerender();
@@ -166,7 +165,6 @@ export function useChessGame(initial: GameSettings) {
     playerColor,
     thinking,
     engineStatus,
-    limiterMin,
     result,
     isPlayersTurn,
     canUndo,

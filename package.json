@@ -12,7 +12,9 @@
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
     "calibrate": "rolldown scripts/calibrate/calibrate.ts --platform node --format esm --dir node_modules/.cache/calibrate && node node_modules/.cache/calibrate/calibrate.js",
-    "check:lessons": "rolldown scripts/check-lessons/check-lessons.ts --platform node --format esm --dir node_modules/.cache/check-lessons && node node_modules/.cache/check-lessons/check-lessons.js"
+    "check:lessons": "rolldown scripts/check-lessons/check-lessons.ts --platform node --format esm --dir node_modules/.cache/check-lessons && node node_modules/.cache/check-lessons/check-lessons.js",
+    "bot-stats": "rolldown scripts/bot-stats/bot-stats.ts --platform node --format esm --dir node_modules/.cache/bot-stats && node node_modules/.cache/bot-stats/bot-stats.js",
+    "calibrate:levels": "npm run calibrate -- --ladder --games 100 --workers 8 --movetime 1000"
   },
   "dependencies": {
     "chess.js": "^1.4.0",

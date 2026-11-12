@@ -7,9 +7,16 @@
 // Players:
 //   sf1320   Stockfish with its calibrated limiter at that Elo (+ opening book, like the app)
 //   t0.75    the app's human-like weak bot at internal strength t (0 … 1)
+//   L4       the app's difficulty level 4 (engine/levels.ts)
 //
 // Usage:
 //   npm run calibrate -- --pair sf1320:t1 --pair t1:t0.75 --games 20 --workers 3 --movetime 500
+//   npm run calibrate -- --ladder --games 100 --workers 8   (level test, see below)
+//
+// --ladder checks the difficulty levels: every level against the one below
+// (L2:L1 … L7:L6) plus Stockfish 1320 against level 6. For each pairing it
+// compares the measured Elo difference with the difference of the levels'
+// shown ratings and marks it OK when the expected value lies in the 95 % range.
 //
 // Adjudication: a full-strength referee (depth 8) checks every 2nd half-move
 // from move 8; ≥ 10 pawns for one side on 3 checks in a row = win. A game is
@@ -68,7 +75,22 @@ async function workerMain() {
   const engine = new StockfishEngine("node");
   await engine.ready;
 
+  const { levelById } = await import("../../src/engine/levels");
+
   async function chooseMove(spec: string, g: Chess, movetime: number): Promise<string | null> {
+    if (spec.startsWith("L")) {
+      const opp = levelById(Number(spec.slice(1))).opponent;
+      spec = opp.kind === "weak" ? `t${opp.t}` : opp.kind === "limiter" ? `sf${opp.elo}` : "full";
+    }
+    if (spec === "full") {
+      const fen = g.fen();
+      if (pliesFromFen(fen) < 12) {
+        const b = bookMove(fen);
+        if (b) return b;
+      }
+      await engine.setOptions({ UCI_LimitStrength: false });
+      return (await engine.search(fen, { movetime, multiPv: 1 })).bestMove;
+    }
     if (spec.startsWith("sf")) {
       const elo = Number(spec.slice(2));
       const fen = g.fen();
@@ -181,6 +203,20 @@ async function main() {
   args.forEach((v, i) => {
     if (v === "--pair") pairs.push(args[i + 1].split(":") as [string, string]);
   });
+  const ladder = args.includes("--ladder");
+  const { LEVELS } = await import("../../src/engine/levels");
+  const expected = new Map<string, number>();
+  if (ladder) {
+    const rated = LEVELS.filter((l) => l.approxElo !== null && l.id <= 7);
+    for (let i = 1; i < rated.length; i++) {
+      const [lo, hi] = [rated[i - 1], rated[i]];
+      pairs.push([`L${hi.id}`, `L${lo.id}`]);
+      expected.set(`L${hi.id} vs L${lo.id}`, hi.approxElo! - lo.approxElo!);
+    }
+    const l6 = LEVELS.find((l) => l.id === 6)!;
+    pairs.push(["sf1320", "L6"]);
+    expected.set("sf1320 vs L6", 1320 - l6.approxElo!);
+  }
   if (pairs.length === 0) pairs.push(["sf1320", "t1"]);
   const gamesPer = Number(opt("games", "20"));
   const workers = Number(opt("workers", "3"));
@@ -217,7 +253,22 @@ async function main() {
   });
 
   console.log(`\nDone in ${((Date.now() - started) / 1000).toFixed(0)} s\n`);
-  console.table(pairs.map(([a, b]) => summarize(a, b, results.filter((r) => (r.white === a && r.black === b) || (r.white === b && r.black === a)))));
+  const rows = pairs.map(([a, b]) => {
+    const row: Record<string, string | number> = summarize(a, b, results.filter((r) => (r.white === a && r.black === b) || (r.white === b && r.black === a)));
+    const exp = expected.get(`${a} vs ${b}`);
+    if (exp !== undefined) {
+      const [lo, hi] = String(row["95 % range"]).split(" … ").map(Number);
+      row.expected = exp;
+      row.check = exp >= lo && exp <= hi ? "OK" : Number(row["Elo diff"]) < exp ? "too close" : "too far apart";
+      delete row.endings;
+    }
+    return row;
+  });
+  console.table(rows);
+  if (ladder) {
+    const bad = rows.filter((r) => r.check && r.check !== "OK");
+    console.log(bad.length === 0 ? "Level test: all steps OK" : `Level test: ${bad.length} of ${rows.length} pairings outside the expected range`);
+  }
 }
 
 if (isMainThread) void main();

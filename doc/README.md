@@ -35,7 +35,8 @@ larger screens get an adapted two-column layout.
 | Post-game review (classification, accuracy, eval graph) | Implemented (2026-11-11) |
 | Move explanations (review only) | Implemented (2026-11-11) |
 | Weak levels: human-like play + opening book | Implemented (2026-11-11) |
-| Calibration of levels below 1320 | Trial run done, full run pending |
+| Difficulty levels 1–10 (replace free Elo input) | Implemented (2026-11-12) |
+| Calibration of levels 1–7 | Done (2026-11-12): round robin + Stockfish anchor, labels within ≈ 25 Elo |
 | Learn tab: 6 openings (White: Italian, Ruy Lopez, Queen's Gambit, London; Black: Sicilian, Caro-Kann), "Is this opening for you?" profiles | Implemented (2026-11-11) |
 | Learn tab: middlegame tactics (6 themes, lessons, 174 Lichess puzzles) | Implemented (2026-11-11) |
 | Right-click highlights and arrows on all boards | Implemented (2026-11-11) |

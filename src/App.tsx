@@ -22,6 +22,7 @@ import {
 } from "./components/Icons";
 import { MoveList } from "./components/MoveList";
 import { NewGameSheet } from "./components/NewGameSheet";
+import { levelById, levelLabel } from "./engine/levels";
 import { PlayerBar } from "./components/PlayerBar";
 import { PromotionDialog } from "./components/PromotionDialog";
 import { ReviewPanel } from "./components/ReviewPanel";
@@ -159,7 +160,7 @@ export default function App({ active = true }: { active?: boolean }) {
   const top = (
     <PlayerBar
       name="Stockfish"
-      detail={`${settings.elo} Elo`}
+      detail={levelLabel(levelById(settings.level))}
       color={opponentColor}
       active={started && !result && game.turn === opponentColor}
       chip={opponentChip}
@@ -294,7 +295,6 @@ export default function App({ active = true }: { active?: boolean }) {
       {sheet === "new" && (
         <NewGameSheet
           initial={settings}
-          limiterMin={game.limiterMin}
           canCancel={started}
           onStart={start}
           onCancel={() => setSheet(null)}

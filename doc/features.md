@@ -17,18 +17,24 @@ Phones are the primary target. See the screens in
 
 - Choose your color: **White**, **Black**, or random. When playing Black the
   board is shown from Black's side and the computer makes the first move.
-- Choose the opponent's strength as an **exact Elo from 100 to 3000**:
-  - number field for typing the exact value,
-  - slider for quick adjustment,
-  - presets: Beginner 400 / Casual 800 / Club 1200 / Strong 1800 /
-    Master 2400 / Maximum 3000.
+- Choose the opponent from **ten difficulty levels**, each with a name, a
+  rough rating and a one-line description of how it plays:
+  1 Newcomer ≈ 750 · 2 Beginner ≈ 850 · 3 Novice ≈ 1000 · 4 Casual ≈ 1100
+  (default) · 5 Intermediate ≈ 1200 · 6 Club ≈ 1300 · 7 Strong club ≈ 1550 ·
+  8 Expert ≈ 2000 · 9 Master ≈ 2400 · 10 Maximum (full Stockfish).
+  - The ratings are rough estimates on Stockfish's engine scale, not
+    chess.com / Lichess ratings.
   - At every level the computer plays standard openings from a small
     opening book (e.g. 1.e4 e5 2.Nf3 Nc6).
-  - Below 1320 Elo the bot plays human-like beginner moves (natural-looking
-    moves, typical beginner mistakes, no random moves); the strength is
-    approximated (see
-    [architecture.md](architecture.md#opponent-strength-elo-100--3000)).
-- Opponent think time per move (e.g. 0.5 s – 3 s).
+  - Levels 1 – 6 play human-like beginner moves (only a few eye-catching
+    moves considered, sometimes the opponent's reply not checked, so pieces
+    get left hanging; no random moves). Levels 7 – 10 are Stockfish's own
+    strength limiter or full strength (see
+    [architecture.md](architecture.md#opponent-strength-levels-1--10)).
+- **Computer think time** per move (0.2 s – 3 s, default 1 s). A hint under
+  the slider explains that it only changes the strength at levels 7 – 10
+  (Stockfish's thinking time); at levels 1 – 6 it only sets how quickly the
+  computer replies. The level ratings were measured at 1 s.
 - Tap-to-move or drag & drop; illegal moves are rejected.
 - Pawn promotion dialog.
 - Game end detection: checkmate, stalemate, threefold repetition,

@@ -56,53 +56,103 @@ A small wrapper class (`StockfishEngine`) hides this:
 
 | Instance | Purpose | Settings |
 |----------|---------|----------|
-| Opponent | Chooses the computer's move | Depends on target Elo (see below), fixed `movetime` |
+| Opponent | Chooses the computer's move | Depends on the difficulty level (see below), fixed `movetime` |
 | Analyzer | Shows best moves to the user | Full strength, `MultiPV=3`, runs until stopped or a depth limit |
 
 Keeping them separate means the weakened opponent settings never affect the
 analysis, and analysis can keep running while the opponent is thinking.
 
-### Opponent strength (Elo 100 – 3000)
+### Opponent strength (levels 1 – 10)
 
-The user enters an exact target Elo from **100 to 3000**. Stockfish's own
-limiter (`UCI_LimitStrength` + `UCI_Elo`) only goes down to **1320**, so two
-modes are used:
+The user picks one of **ten difficulty levels** instead of typing an Elo
+number. Each level is a fixed engine setting, defined in
+`src/engine/levels.ts`:
 
-| Target Elo | Method |
-|------------|--------|
-| 1320 – 3000 | Stockfish's built-in limiter: `UCI_LimitStrength=true`, `UCI_Elo=<target>`. Calibrated by the Stockfish team. |
-| 100 – 1319 | Human-like weakening (no random moves): Stockfish scores **every legal move** (MultiPV = all moves, depth 4–8). Each move also gets a *plausibility* weight for how natural it looks to a beginner. The bot draws a move with weight `plausibility^k × exp(−loss / T)`; the lower the Elo, the higher the temperature `T` and the more it trusts "looks natural" over "is good". |
+| Level | Name | Shown rating | Engine setting |
+|-------|------|--------------|----------------|
+| 1 | Newcomer | ≈ 750 | Weak bot, t = −1 |
+| 2 | Beginner | ≈ 850 | Weak bot, t = −0.58 |
+| 3 | Novice | ≈ 1000 | Weak bot, t = −0.15 |
+| 4 | Casual (default) | ≈ 1100 | Weak bot, t = 0 |
+| 5 | Intermediate | ≈ 1200 | Weak bot, t = 0.2 |
+| 6 | Club | ≈ 1300 | Weak bot, t = 0.48 |
+| 7 | Strong club | ≈ 1550 | Stockfish limiter, `UCI_Elo=1600` (measured ≈ 1540 on the app's scale, see below) |
+| 8 | Expert | ≈ 2000 | Stockfish limiter, `UCI_Elo=2000` |
+| 9 | Master | ≈ 2400 | Stockfish limiter, `UCI_Elo=2400` |
+| 10 | Maximum | – | Stockfish at full strength (`UCI_LimitStrength=false`) |
+
+- **Levels 7 – 10** use Stockfish's own limiter (`UCI_LimitStrength` +
+  `UCI_Elo`, calibrated by the Stockfish team) or full strength, with the
+  chosen think time per move.
+- **Levels 1 – 6** use the app's human-like weak bot (below), because the
+  limiter only goes down to 1320. *t* is its internal strength (−1 … 1);
+  every weak-bot setting is derived from it in `paramsForT()`.
+- The levels 1 – 6 were chosen so that the steps are even (each level should
+  win about two thirds of its games against the one below, ≈ 115 Elo) and
+  level 6 is about as strong as Stockfish's limiter at 1320. Check with
+  `npm run calibrate:levels` (see [calibration.md](calibration.md)).
+- Level 7 is labelled ≈ 1550 although it uses `UCI_Elo=1600`: the app runs
+  the lite Stockfish build with a fixed time per move, which plays a bit
+  weaker than Stockfish's official calibration (measured 2026-11-12, see
+  [calibration.md](calibration.md)). Levels 8 – 9 are not measured and are
+  probably also somewhat below their labels.
+- The shown ratings are rough, on Stockfish's engine scale (anchored to its
+  limiter at 1320), **not** chess.com or Lichess ratings.
+- Settings saved by older versions (an exact Elo) are mapped to the level with
+  the nearest shown rating (`levelForElo()`).
 
 **Opening book (all levels):** the computer first follows a small book of
 standard opening lines that club players actually play
 (`src/engine/openingBook.ts`: about 35 lines – Italian, Ruy Lopez, Scotch,
 Sicilian, French, Caro-Kann, Scandinavian, Queen's Gambit, Slav, London, King's
 Indian, Nimzo-Indian, English, Réti, …), chosen by popularity. It leaves the
-book after 8 half-moves at 100 Elo, up to 12 at 1300 and above, or as soon as
-the position isn't in the book. In the first 10 moves the weak bot also uses a
-much lower temperature (60 → 25 cp), so even 100-Elo openings are sound; the
-beginner mistakes happen in the middlegame. Example: the 100-Elo bot answered
-1.e4 with e5 17/40, c5 8/40, c6 6/40, e6 5/40, d5 3/40, d6 1/40.
+book after 8 half-moves at levels 1 – 4, 9 at level 5, 10 at level 6 and 12 at
+levels 7 – 10, or as soon as the position isn't in the book. In the first 10
+moves the weak bot is also more careful (spots the right idea more often,
+checks replies three times as often), so even level-1 openings are mostly
+sound.
+
+**How the weak bot picks a move** (`humanLikeMove()` in `src/engine/strength.ts`):
+
+1. Stockfish scores every legal move at a shallow depth.
+2. **Clearly winning** (≥ 5 pawns, or a forced mate): with the "convert"
+   chance the bot plays the best move at depth 10, so won games get finished
+   instead of shuffling around. Forced mates rank above any material.
+3. **Candidates:** a few moves are drawn by plausibility (see below). With
+   the "spot best" chance the engine's best move is added too.
+4. **Blindness:** for each candidate, with the "blindness" chance, the bot
+   doesn't check the opponent's reply. It then judges that move only by what
+   it captures right away (slightly below a checked move of equal value).
+   This produces the typical beginner blunders: leaving a piece hanging,
+   moving into an attack, grabbing a defended piece.
+5. The best-looking candidate is played, with a little randomness.
+
+Settings per level (from `paramsForT()`):
+
+| Level | Depth | Candidates | Spot best | Blindness | Convert |
+|-------|-------|------------|-----------|-----------|---------|
+| 1 | 1 | 1 | 25 % | 85 % | 35 % |
+| 2 | 1 | 1 | 40 % | 66 % | 40 % |
+| 3 | 1 | 1 | 55 % | 43 % | 55 % |
+| 4 | 1 | 2 | 60 % | 36 % | 60 % |
+| 5 | 2 | 3 | 67 % | 27 % | 67 % |
+| 6 | 3 | 5 | 77 % | 17 % | 77 % |
+
+Levels 1 – 3 differ only in how often they spot the best move and how often
+they check replies.
 
 Plausibility rules (`plausibility()` in `src/engine/strength.ts`):
 
-- More likely: captures (beginners love them, even bad ones), checks,
+- More likely: captures (beginners love them; grabbing a defended piece with
+  a more valuable one is less tempting), checks,
   promotions, castling, moves toward the centre, forward moves, rescuing a
-  piece that is under attack (noticed more often at higher Elo).
+  piece that is under attack (noticed more often at higher levels).
 - Opening habits (first 12 moves): develop knights and bishops, push d/e
   pawns; edge pawns, early queen and rook moves are less likely.
 - Less likely: king walks, retreats, knights to the rim.
-- Evaluations are clipped at ±15 pawns, so a mate counts like a big material
-  win and a weak bot can miss a mate or walk into one.
 
-Typical result (self-play test, 6 games × 40 plies per level, referee at
-depth 10): share of moves that lose ≥ 2 pawns — 100 Elo: 21 %, 500: 9 %,
-900: 3 %, 1300: 0 %. The mistakes are beginner-like (walking into forks,
-grabbing defended material, overlooking threats).
-
-Below 1320 the Elo is an **approximation**, not a calibrated rating. All
-parameters live in `weakParams()` so they can be calibrated later by
-automated matches against Stockfish's own 1320 level.
+Measured behaviour (move quality per level, level steps):
+see [calibration.md](calibration.md).
 
 ### Move explanations
 

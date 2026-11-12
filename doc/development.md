@@ -23,6 +23,7 @@ npm run preview   # serve the production build locally
 ├── scripts/
 │   ├── copy-stockfish.mjs       # copies the engine into public/stockfish (runs before dev/build)
 │   ├── calibrate/calibrate.ts   # calibration matches for weak levels (npm run calibrate)
+│   ├── bot-stats/bot-stats.ts   # move-quality statistics per level (npm run bot-stats)
 │   ├── check-lessons/           # lesson quality check (npm run check:lessons)
 │   ├── puzzles/extract-puzzles.mjs # picks puzzles from the Lichess database (needs the .csv.zst download)
 │   └── lib/nodeEngine.ts        # runs the app's engine class in Node
@@ -35,7 +36,8 @@ npm run preview   # serve the production build locally
 │   ├── engine/
 │   │   ├── StockfishEngine.ts   # UCI wrapper around the Web Worker (queued searches)
 │   │   ├── uci.ts               # parsing of `info` / `bestmove` / option lines
-│   │   ├── strength.ts          # Elo 100–3000 → limiter or own weakening
+│   │   ├── strength.ts          # level → limiter, full strength or own weak bot
+│   │   ├── levels.ts            # the ten difficulty levels (name, rating, engine setting)
 │   │   ├── openingBook.ts       # standard opening lines used by the computer
 │   │   └── engines.ts           # shared engine instances (opponent/review, analyzer)
 │   ├── analysis/
@@ -67,12 +69,12 @@ npm run preview   # serve the production build locally
 │   │   └── material.ts          # captured pieces and material balance
 │   └── components/
 │       ├── Board.tsx            # react-chessboard with tap-to-move and highlights
-│       ├── PlayerBar.tsx            # name, Elo/status, captured pieces
+│       ├── PlayerBar.tsx            # name, level/status, captured pieces
 │       ├── CapturedPieces.tsx
 │       ├── useSquareMarks.ts    # right-click square highlights (all boards)
 │       ├── ThemeSwitch.tsx      # Auto / Light / Dark switch in the top bar
 │       ├── MoveList.tsx
-│       ├── NewGameSheet.tsx     # colour, exact Elo, think time
+│       ├── NewGameSheet.tsx     # colour, difficulty level, think time
 │       ├── PromotionDialog.tsx
 │       ├── EvalBar.tsx          # horizontal on phones, vertical from 768px
 │       ├── AnalysisPanel.tsx    # top 1–3 lines with eval and depth
