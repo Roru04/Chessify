@@ -12,7 +12,7 @@ interface Props {
   onSelect?: (ply: number) => void;
 }
 
-const MARKED: MoveClass[] = ["inaccuracy", "mistake", "blunder"];
+const MARKED: MoveClass[] = ["brilliant", "great", "inaccuracy", "mistake", "miss", "blunder"];
 
 export function MoveList({ history, currentPly, marks, onSelect }: Props) {
   const ref = useRef<HTMLOListElement>(null);
@@ -22,8 +22,19 @@ export function MoveList({ history, currentPly, marks, onSelect }: Props) {
     const el = ref.current;
     if (!el) return;
     const active = el.querySelector<HTMLElement>(".cur");
-    if (active && onSelect) active.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
-    else el.scrollTo({ left: el.scrollWidth, top: el.scrollHeight, behavior: "smooth" });
+    if (active && onSelect) {
+      // Scroll only inside the list (if it has its own scroll area), never the page:
+      // scrollIntoView would also scroll the page down to the list on every step.
+      const box = el.getBoundingClientRect();
+      const r = active.getBoundingClientRect();
+      let top = el.scrollTop;
+      let left = el.scrollLeft;
+      if (r.top < box.top) top -= box.top - r.top;
+      else if (r.bottom > box.bottom) top += r.bottom - box.bottom;
+      if (r.left < box.left) left -= box.left - r.left;
+      else if (r.right > box.right) left += r.right - box.right;
+      if (top !== el.scrollTop || left !== el.scrollLeft) el.scrollTo({ top, left, behavior: "smooth" });
+    } else el.scrollTo({ left: el.scrollWidth, top: el.scrollHeight, behavior: "smooth" });
   }, [history.length, cur, onSelect]);
 
   const rows: { n: number; white?: number; black?: number }[] = [];

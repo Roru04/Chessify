@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useId, useMemo, useState, type CSSProperties } from "react";
 import { Chessboard } from "react-chessboard";
 import type { Square } from "chess.js";
 import type { ChessGame } from "../game/useChessGame";
@@ -15,9 +15,10 @@ export interface BoardView {
 }
 
 interface Props {
-  game: ChessGame;
+  /** The live game. Without it the board is read-only and shows `view`. */
+  game?: ChessGame;
   orientation: "white" | "black";
-  onPromotion: (from: Square, to: Square) => void;
+  onPromotion?: (from: Square, to: Square) => void;
   view?: BoardView;
 }
 
@@ -29,11 +30,17 @@ const CHECK = "radial-gradient(circle, rgba(220, 40, 30, 0.85) 0%, rgba(220, 40,
 
 export function Board({ game, orientation, onPromotion, view }: Props) {
   const [selected, setSelected] = useState<Square | null>(null);
-  const { playerColor } = game;
-  const fen = view ? view.fen : game.fen;
-  const lastMove = view ? view.lastMove : game.lastMove;
-  const checkSquare = view ? view.checkSquare : game.checkSquare;
-  const isPlayersTurn = !view && game.isPlayersTurn;
+  // Each board needs its own id: react-chessboard finds squares with
+  // document.querySelector(`#${id}-square-…`) when animating, so two boards
+  // with the same id (e.g. the hidden Play board and an import review) clash.
+  // useId() contains ":" which isn't valid in a CSS selector, so strip it.
+  const boardId = `board-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
+  const playerColor = game?.playerColor;
+  const live = !view && game ? game : null;
+  const fen = live ? live.fen : (view?.fen ?? "start");
+  const lastMove = live ? live.lastMove : (view?.lastMove ?? null);
+  const checkSquare = live ? live.checkSquare : (view?.checkSquare ?? null);
+  const isPlayersTurn = !!live?.isPlayersTurn;
 
   // Right-click highlights (cleared by a left click or a new position).
   const marks = useSquareMarks(fen);
@@ -41,15 +48,16 @@ export function Board({ game, orientation, onPromotion, view }: Props) {
   // Clear the selection whenever the position changes.
   useEffect(() => setSelected(null), [fen]);
 
-  const targets = useMemo(() => (selected && !view ? game.legalTargets(selected) : []), [selected, game, fen, view]);
+  // fen is a dependency because the targets change with the position.
+  const targets = useMemo(() => (selected && live ? live.legalTargets(selected) : []), [selected, live, fen]);
 
   function tryMove(from: Square, to: Square): boolean {
-    if (!game.legalTargets(from).some((m) => m.to === to)) return false;
-    if (game.isPromotion(from, to)) {
-      onPromotion(from, to);
+    if (!live || !live.legalTargets(from).some((m) => m.to === to)) return false;
+    if (live.isPromotion(from, to)) {
+      onPromotion?.(from, to);
       return false; // the board shows the move once a piece is chosen
     }
-    return game.playMove(from, to);
+    return live.playMove(from, to);
   }
 
   function onSquareClick({ square, piece }: { square: string; piece: { pieceType: string } | null }) {
@@ -83,7 +91,7 @@ export function Board({ game, orientation, onPromotion, view }: Props) {
     <div className="board" aria-label="Chess board">
       <Chessboard
         options={{
-          id: "main-board",
+          id: boardId,
           position: fen,
           boardOrientation: orientation,
           allowDragging: isPlayersTurn,

@@ -9,12 +9,11 @@
 import { Chess, type Color, type Move, type PieceSymbol, type Square } from "chess.js";
 import { formatScore } from "../analysis/format";
 import { splitUciMove } from "../engine/uci";
-import { winPercentFor, type MoveClass, type PositionEval } from "../review/classify";
+import { GOOD_CLASSES, winPercentFor, type MoveClass, type PositionEval } from "../review/classify";
+import { VALUE, hangingPieces, isHanging, other } from "../review/hanging";
 
-const VALUE: Record<PieceSymbol, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 100 };
 const NAME: Record<PieceSymbol, string> = { p: "pawn", n: "knight", b: "bishop", r: "rook", q: "queen", k: "king" };
 const SIDE: Record<Color, string> = { w: "White", b: "Black" };
-const other = (c: Color): Color => (c === "w" ? "b" : "w");
 
 /** "the queen", "a pawn", "the knight on c6" */
 function pieceRef(type: PieceSymbol, square?: string): string {
@@ -73,23 +72,6 @@ function mateFor(e: PositionEval | undefined, color: Color): number | null {
   const m = e.score.mate;
   if (color === "w" ? m > 0 : m < 0) return Math.abs(m);
   return null;
-}
-
-/** Is the piece on `sq` (of colour `color`) in danger: attacked and undefended, or attacked by something cheaper? */
-function isHanging(g: Chess, sq: Square, color: Color): boolean {
-  const piece = g.get(sq);
-  if (!piece || piece.color !== color || piece.type === "k") return false;
-  const attackers = g.attackers(sq, other(color));
-  if (attackers.length === 0) return false;
-  const defenders = g.attackers(sq, color);
-  const cheapest = Math.min(...attackers.map((s) => VALUE[g.get(s)!.type]));
-  return defenders.length === 0 || cheapest < VALUE[piece.type];
-}
-
-function hangingPieces(g: Chess, color: Color): Square[] {
-  const out: Square[] = [];
-  for (const row of g.board()) for (const p of row) if (p && p.color === color && isHanging(g, p.square, color)) out.push(p.square);
-  return out;
 }
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -207,8 +189,16 @@ export function explainMove(move: Move, cls: MoveClass, before: PositionEval, af
     return r.length ? `${bestSan}: ${r.map((s, i) => (i === 0 ? s.charAt(0).toLowerCase() + s.slice(1) : s)).join(" ")}` : bestSan;
   };
 
-  if (cls === "best" || cls === "excellent" || cls === "good") {
+  if (GOOD_CLASSES.includes(cls)) {
     const text = goodReasons(move.before, move.lan, after.pv ?? [], after, prev);
+    if (cls === "book") return { text: ["A known opening move.", ...text.slice(0, 1)], best: null };
+    if (cls === "great") return { text: ["The only good move: every other move is clearly worse.", ...text.slice(0, 1)], best: null };
+    if (cls === "brilliant") {
+      const g = new Chess(move.after);
+      const sac = hangingPieces(g, me).find((sq) => VALUE[g.get(sq)!.type] >= 3);
+      const piece = sac ? pieceRef(g.get(sac)!.type, sac) : "material";
+      return { text: [`Sacrifices ${piece}, and it works: taking it doesn't pay off for ${SIDE[opp]}.`, ...text.slice(0, 1)], best: bestWhy() };
+    }
     return { text, best: cls === "best" ? null : bestWhy() };
   }
 
@@ -248,6 +238,9 @@ export function explainMove(move: Move, cls: MoveClass, before: PositionEval, af
       }
     }
     if (reply && !text[0].includes(reply.san)) text.push(`${SIDE[opp]}'s best reply is ${reply.san}.`);
+  }
+  if (cls === "miss" && !mateFor(before, me) && prev) {
+    text.unshift(`${SIDE[opp]}'s last move (${prev.san}) was a mistake, but this doesn't punish it.`);
   }
   return { text: text.map(cap), best: bestWhy() };
 }

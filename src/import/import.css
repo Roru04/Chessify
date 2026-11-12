@@ -1,0 +1,213 @@
+/* Import tab. Mobile first: one column, list rows full width. Uses the app's tokens. */
+
+.import-page {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-block: 16px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.import-page > * {
+  max-width: 720px;
+  margin-inline: auto;
+}
+.import-page > * + * {
+  margin-top: 20px;
+}
+
+.import-head h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+.import-head p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+  max-width: 60ch;
+}
+
+/* username search */
+.import-search {
+  display: grid;
+  gap: 8px;
+}
+.import-search-row {
+  display: flex;
+  gap: 8px;
+}
+.import-search .text {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  font-size: 16px; /* 16px keeps iOS from zooming in */
+}
+.import-search .text:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
+  border-color: var(--accent);
+}
+.import-search .btn {
+  flex: none;
+  padding-inline: 18px;
+}
+
+/* toolbar + filters */
+.import-results > * + * {
+  margin-top: 12px;
+}
+.import-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.import-filters {
+  display: grid;
+  gap: 8px;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chips button {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--fg);
+  border-radius: 99px;
+  padding: 6px 14px;
+  min-height: 34px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.chips button.on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* game list */
+.game-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.game-list li + li {
+  border-top: 1px solid var(--line);
+}
+.game-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 0;
+  background: none;
+  text-align: left;
+}
+.game-row:hover {
+  background: var(--surface-2);
+}
+.outcome {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: #fff;
+  background: var(--muted);
+}
+.outcome.o-win {
+  background: var(--good);
+}
+.outcome.o-loss {
+  background: var(--bad);
+}
+.game-main {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.game-players {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.game-players b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.muted {
+  color: var(--muted);
+}
+.piece-dot {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1px solid var(--muted);
+}
+.piece-dot.white {
+  background: var(--eval-white);
+}
+.piece-dot.black {
+  background: var(--eval-black);
+}
+.game-meta,
+.game-opening {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.game-side {
+  flex: none;
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.game-rating {
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.game-acc {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.import-more {
+  width: 100%;
+}
+.import-privacy {
+  line-height: 1.5;
+}
+
+/* note above the board in an imported-game review */
+.import-note {
+  background: var(--accent-soft);
+  color: var(--fg);
+  padding: 8px max(16px, env(safe-area-inset-left, 0px));
+  font-size: 13px;
+}

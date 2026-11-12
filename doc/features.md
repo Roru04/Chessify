@@ -91,26 +91,40 @@ When a game is over, **Review game** on the result card (or **Review** in the
 tab bar) opens a move-by-move review, similar to chess.com's Game Review.
 
 - The idle opponent engine analyses every position of the game at depth 14
-  (full strength). A progress bar shows how far it is; moves can be browsed
+  (full strength), with the two best lines (the second one is needed for
+  "Great"). A progress bar shows how far it is; moves can be browsed
   while it is still running. Results are cached, so reopening is instant.
-- Every move is classified by how much it lowered the mover's winning
-  chances (win %, Lichess model):
+- Every move gets one of chess.com's ten classes. The base is how much the
+  move lowered the mover's winning chances (win %, Lichess model); Book,
+  Brilliant, Great and Miss come from the game context
+  (`classifyInContext()` in `src/review/classify.ts`):
 
-  | Class | Symbol | Win-% lost |
-  |-------|--------|------------|
+  | Class | Symbol | Rule |
+  |-------|--------|------|
+  | Brilliant | !! | Best or excellent move that leaves a knight or more en prise (worth ≥ 2 more than anything it captured), when the mover wasn't already ≥ 95 % winning and is still ≥ 50 % afterwards |
+  | Great | ! | Best move, and the second-best move is ≥ 15 win-% worse (best ≥ 35 %, second ≤ 80 %); not for recaptures or taking a hanging piece |
   | Best | ★ | engine's top move (or a mating move) |
-  | Excellent | ! | < 2 |
-  | Good | ✓ | < 5 |
-  | Inaccuracy | ?! | < 10 |
-  | Mistake | ? | < 20 |
-  | Blunder | ?? | 20 or more |
+  | Excellent | ✓✓ | loses < 2 |
+  | Good | ✓ | loses < 5 |
+  | Book | ≡ | opening theory: for chess.com games as far as chess.com's opening tag goes, otherwise (and beyond it) moves in the app's opening book |
+  | Inaccuracy | ?! | loses < 10 |
+  | Mistake | ? | loses < 20 |
+  | Miss | ✗ | a mistake or blunder right after the opponent's own mistake (≥ 10 win-% lost), when the mover is still ≥ 40 % afterwards; or missing a forced mate in ≤ 3 |
+  | Blunder | ?? | loses 20 or more |
+
+  Check on 8 real chess.com games (≈ 950 moves, 2026-11-12): 7 Brilliant,
+  13 Great, 6 Miss; Book matched chess.com's opening length in every game.
+  chess.com's exact rules aren't public, so the classes are close but won't
+  always match chess.com.
 
 - The board shows the selected position with a coloured badge on the moved
   piece. A card names the move's class, the evaluation, the win-% lost and
   the best move if a different one was played.
 - Evaluation graph over the whole game (white area = White's winning
-  chances), with dots on inaccuracies, mistakes and blunders. Tap or drag on
-  it to jump to a move.
+  chances), with dots on brilliant and great moves, inaccuracies, mistakes,
+  misses and blunders. A handle at the shown move is a
+  slider inside the graph: drag it to move through the game (or focus it and
+  use the arrow keys). Tapping the graph itself does nothing.
 - Summary table: accuracy for you and Stockfish (Lichess accuracy formula,
   chess.com's is not public) and the number of moves in each class.
 - Navigation: Start / Back / Next / End / Done in the tab bar, arrow keys
@@ -131,7 +145,8 @@ tab bar) opens a move-by-move review, similar to chess.com's Game Review.
   hanging (unprotected) pieces, forks, attacks, escaping a threat, defending a
   piece, castling, promotion and opening development. When none of these
   apply, the change in evaluation is described instead.
-- Not included yet: Brilliant, Great, Book and Miss classes.
+- The move list marks brilliant, great, inaccurate, mistaken, missed and
+  blundered moves with their symbol.
 
 ## 5. Learn tab
 
@@ -189,6 +204,33 @@ start below the top bar, so the switch always stays usable. Pages have their own
   as mistakes must lose at least 1 pawn. It also checks that all puzzle
   solutions are legal. Last full run: 391 lesson moves, 0 problems (before
   the Caro-Kann Two Knights line was added).
+
+## 5b. Import tab: chess.com games
+
+A third tab in the top bar (Play | Learn | Import) reviews games played on
+chess.com. Only chess.com for now (Lichess and PGN paste may follow).
+
+- Enter a chess.com username. It is remembered in this browser, and its games
+  load automatically the next time the tab is opened.
+- The list shows the most recent month with games first, newest game on top.
+  Each row: result (W / L / D), your colour, opponent and rating, time class
+  and time control, date, how the game ended, opening name, your rating and,
+  where available, chess.com's accuracy for you.
+- Filters: time class (only those present) and result (won / lost / draw).
+- **Load older games** loads the previous month; months without standard
+  games are skipped. **Refresh** reloads, for games finished since.
+- Tap a game to open the same review as after a game against the computer,
+  from your side of the board. The summary shows our accuracy and, below it,
+  **chess.com's accuracy for comparison** (only for games chess.com has
+  analysed; the two use different engines and formulas, so they differ).
+- Long games (over 60 moves) show a note that the analysis takes a while;
+  the results stream in while browsing.
+- Only standard chess from the normal start position is listed (no Chess960
+  or other variants).
+- Errors are explained in plain words: unknown username, chess.com limiting
+  requests, no connection.
+- Privacy: games are loaded directly from chess.com's public API; only the
+  username is sent and nothing but the last username is stored.
 
 ## 6. Game controls
 

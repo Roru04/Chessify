@@ -52,15 +52,19 @@ A small wrapper class (`StockfishEngine`) hides this:
   parses `info` lines and emits updates.
 - `stop()` → `stop`; resolves when `bestmove` arrives.
 
-### Two instances
+### Engine instances
 
 | Instance | Purpose | Settings |
 |----------|---------|----------|
-| Opponent | Chooses the computer's move | Depends on the difficulty level (see below), fixed `movetime` |
+| Opponent | Chooses the computer's move; after the game, reviews it | Depends on the difficulty level (see below), fixed `movetime`; review at full strength, depth 14, `MultiPV=2` |
 | Analyzer | Shows best moves to the user | Full strength, `MultiPV=3`, runs until stopped or a depth limit |
+| Import reviewer | Reviews imported chess.com games | Full strength, depth 14, `MultiPV=2`; started on first use |
 
 Keeping them separate means the weakened opponent settings never affect the
 analysis, and analysis can keep running while the opponent is thinking.
+Imported games get their own engine because a game against the computer can
+still be running in the Play tab: the opponent switches its strength limit
+on and off per move, which would weaken a review sharing it.
 
 ### Opponent strength (levels 1 – 10)
 
@@ -210,6 +214,30 @@ them to White's perspective before displaying (positive = White better).
 1. Position changes (any move, undo, new game) → `stop` current analysis.
 2. Send new `position fen …` and `go infinite` (or `go depth N`).
 3. Stream `info` updates to the UI, throttled to avoid excessive re-renders.
+
+## chess.com import
+
+`src/import/chesscom.ts` talks to chess.com's public API directly from the
+browser (no login, CORS allowed, so no server is needed on GitHub Pages):
+
+1. `GET /pub/player/{user}/games/archives` → list of monthly archive URLs.
+2. `GET /pub/player/{user}/games/{YYYY}/{MM}` → all games of that month,
+   each with PGN, players, ratings, result codes, time class, opening link
+   and (for analysed games) chess.com's accuracies.
+
+Months are loaded one at a time, newest first, and cached in memory for the
+session (failed requests are not cached). Games that aren't standard chess
+from the normal start position are dropped. chess.com's result codes map to
+our end reasons (`checkmated` → checkmate, `resigned`, `timeout`,
+`abandoned`, `agreed`, `repetition`, `stalemate`, `insufficient`, `50move`,
+`timevsinsufficient`). Errors become `ChessComError` with a kind
+(`not-found`, `rate-limit`, `network`, `bad-response`) and a user-facing
+message.
+
+The PGN is read with chess.js (clock comments are ignored) and the move list
+goes to `GameReview` (`src/components/GameReview.tsx`), the same component
+the post-game review uses. `Board` can show a position without a live game
+for this.
 
 ## State
 

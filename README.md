@@ -14,9 +14,13 @@ engine is Stockfish compiled to WebAssembly, so no server is needed.
 - **Live analysis** (optional): evaluation bar, the engine's top 1–3 moves
   with their lines and search depth, "hide hints on my turn".
 - **Captured pieces** and material advantage next to each player.
-- **Game review**: every move graded (Best, Excellent, Good, Inaccuracy,
-  Mistake, Blunder) with a plain-language explanation, accuracy per player,
+- **Game review**: every move graded with chess.com's classes (Brilliant,
+  Great, Best, Excellent, Good, Book, Inaccuracy, Mistake, Miss, Blunder)
+  with a plain-language explanation, accuracy per player,
   evaluation graph and move-by-move navigation.
+- **Import from chess.com**: enter a username, pick one of your recent
+  games and get the same full review, with chess.com's own accuracy shown
+  next to ours for comparison.
 - **Learn tab**: opening courses for White and Black (Italian, Ruy Lopez,
   Queen's Gambit, London, Sicilian, Caro-Kann) with explanations, practice
   mode and "is this opening for you?" advice, plus middlegame tactics

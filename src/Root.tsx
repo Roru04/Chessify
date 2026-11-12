@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useState } from "react";
 import App from "./App";
+import ImportScreen from "./import/ImportScreen";
 import { ThemeSwitch } from "./components/ThemeSwitch";
 
 // The Learn tab is loaded only when it is opened, so playing stays fast.
@@ -9,7 +10,7 @@ const readRoute = () => (typeof location === "undefined" ? "" : location.hash.re
 const LEARN_PAGES = ["learn", "practice", "tactic", "lesson", "puzzles"];
 const isLearn = (r: string) => LEARN_PAGES.some((p) => r === p || r.startsWith(`${p}-`));
 
-/** Top-level tabs: Play (the game, kept mounted so it isn't lost) and Learn. */
+/** Top-level tabs: Play (the game, kept mounted so it isn't lost), Learn and Import. */
 export default function Root() {
   const [route, setRoute] = useState(readRoute);
 
@@ -23,6 +24,13 @@ export default function Root() {
   }, []);
 
   const learn = isLearn(route);
+  const importing = route === "import";
+  const play = !learn && !importing;
+  // Import stays mounted once opened, so the loaded games and an open review survive tab switches.
+  const [importOpened, setImportOpened] = useState(importing);
+  useEffect(() => {
+    if (importing) setImportOpened(true);
+  }, [importing]);
 
   return (
     <div className="root">
@@ -30,17 +38,25 @@ export default function Root() {
         <span className="brand">Chessify</span>
         <ThemeSwitch />
         <nav className="navswitch" aria-label="Sections">
-          <a href="#play" className={learn ? "" : "on"} aria-current={learn ? undefined : "page"}>
+          <a href="#play" className={play ? "on" : ""} aria-current={play ? "page" : undefined}>
             Play
           </a>
           <a href="#learn" className={learn ? "on" : ""} aria-current={learn ? "page" : undefined}>
             Learn
           </a>
+          <a href="#import" className={importing ? "on" : ""} aria-current={importing ? "page" : undefined}>
+            Import
+          </a>
         </nav>
       </header>
-      <div className="screen" hidden={learn}>
-        <App active={!learn} />
+      <div className="screen" hidden={!play}>
+        <App active={play} />
       </div>
+      {importOpened && (
+        <div className="screen" hidden={!importing}>
+          <ImportScreen active={importing} />
+        </div>
+      )}
       {learn && (
         <div className="screen screen-learn">
           <Suspense fallback={<p className="loading">Loading lessons…</p>}>

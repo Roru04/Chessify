@@ -40,6 +40,7 @@ larger screens get an adapted two-column layout.
 | Learn tab: 6 openings (White: Italian, Ruy Lopez, Queen's Gambit, London; Black: Sicilian, Caro-Kann), "Is this opening for you?" profiles | Implemented (2026-11-11) |
 | Learn tab: middlegame tactics (6 themes, lessons, 174 Lichess puzzles) | Implemented (2026-11-11) |
 | Right-click highlights and arrows on all boards | Implemented (2026-11-11) |
+| Import tab: chess.com games (list, filters, review, chess.com accuracy comparison) | Implemented (2026-11-12) |
 | Learn tab: endgame | Planned |
 | Hosting | Live on GitHub Pages: https://roru04.github.io/Chessify/ |
 | AI explanations | Deferred, optional (see roadmap phase 3b) |

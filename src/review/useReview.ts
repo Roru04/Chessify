@@ -5,8 +5,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Chess, type Move } from "chess.js";
 import { getReviewEngine } from "../engine/engines";
+import { isBookMove } from "../engine/openingBook";
+import type { StockfishEngine } from "../engine/StockfishEngine";
 import { pvToSan, toWhitePerspective } from "../analysis/format";
-import { classifyMove, gameAccuracy, type MoveClass, type MoveVerdict, type PositionEval } from "./classify";
+import { CLASS_ORDER, classifyInContext, gameAccuracy, winPercentFor, type MoveClass, type MoveVerdict, type PositionEval } from "./classify";
 
 /** Search depth per position: a balance between quality and speed on phones. */
 export const REVIEW_DEPTH = 14;
@@ -43,9 +45,30 @@ function terminalEval(fen: string): PositionEval | null {
   return null;
 }
 
-const zeroCounts = (): Record<MoveClass, number> => ({ best: 0, excellent: 0, good: 0, inaccuracy: 0, mistake: 0, blunder: 0 });
+const zeroCounts = () => Object.fromEntries(CLASS_ORDER.map((c) => [c, 0])) as Record<MoveClass, number>;
 
-export function useReview(history: Move[], active: boolean): ReviewState {
+/**
+ * How many moves from the start are "book": at least `knownPlies` (e.g. from
+ * chess.com's opening tag), and further as long as the moves are in our own
+ * opening book.
+ */
+function bookPlies(history: Move[], knownPlies: number): number {
+  if (history.length === 0 || history[0].before !== START_FEN) return 0;
+  let n = 0;
+  while (n < history.length && (n < knownPlies || isBookMove(history[n].before, history[n].lan))) n++;
+  return n;
+}
+
+/**
+ * `getEngine` picks the engine to analyse with (default: the idle opponent engine).
+ * `knownBookPlies`: half-moves known to be opening theory (e.g. from chess.com).
+ */
+export function useReview(
+  history: Move[],
+  active: boolean,
+  getEngine: () => StockfishEngine = getReviewEngine,
+  knownBookPlies = 0,
+): ReviewState {
   const fens = useMemo(
     () => (history.length ? [history[0].before, ...history.map((m) => m.after)] : [START_FEN]),
     // history objects change identity on every render; the move list defines the game
@@ -57,7 +80,7 @@ export function useReview(history: Move[], active: boolean): ReviewState {
   useEffect(() => {
     if (!active) return;
     let cancelled = false;
-    const engine = getReviewEngine();
+    const engine = getEngine();
     (async () => {
       await engine.setOptions({ UCI_LimitStrength: false });
       for (const fen of fens) {
@@ -67,14 +90,17 @@ export function useReview(history: Move[], active: boolean): ReviewState {
         if (terminal) {
           cache.set(fen, terminal);
         } else {
-          const res = await engine.search(fen, { depth: REVIEW_DEPTH, multiPv: 1 });
+          // Two lines: the second-best move is needed to spot "Great" (only) moves.
+          const res = await engine.search(fen, { depth: REVIEW_DEPTH, multiPv: 2 });
           if (cancelled) return;
           const line = res.lines[0];
+          const second = res.lines[1];
           const turn = new Chess(fen).turn();
           cache.set(fen, {
             score: line ? toWhitePerspective(line.score, turn) : { cp: 0 },
             bestMove: res.bestMove,
             pv: line?.pv ?? (res.bestMove ? [res.bestMove] : []),
+            second: second ? toWhitePerspective(second.score, turn) : undefined,
           });
         }
         setTick((t) => t + 1);
@@ -84,14 +110,17 @@ export function useReview(history: Move[], active: boolean): ReviewState {
       cancelled = true;
       engine.stop();
     };
-  }, [active, fens]);
+  }, [active, fens, getEngine]);
 
   const evals = fens.map((f) => cache.get(f));
+  const book = bookPlies(history, knownBookPlies);
   const moves: (ReviewedMove | undefined)[] = history.map((m, i) => {
     const before = evals[i];
     const after = evals[i + 1];
     if (!before || !after) return undefined;
-    const verdict = classifyMove(m.color, m.lan, before, after);
+    const prevBefore = i > 0 ? evals[i - 1] : undefined;
+    const prevLoss = prevBefore ? Math.max(0, winPercentFor(history[i - 1].color, prevBefore) - winPercentFor(history[i - 1].color, before)) : null;
+    const verdict = classifyInContext({ move: m, before, after, inBook: i < book, prev: i > 0 ? history[i - 1] : null, prevLoss });
     const bestSan = before.bestMove && before.bestMove !== m.lan ? (pvToSan(m.before, [before.bestMove])[0]?.san ?? null) : null;
     return { move: m, verdict, bestSan };
   });

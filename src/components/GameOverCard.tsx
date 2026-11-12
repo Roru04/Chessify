@@ -1,14 +1,6 @@
 import type { Color } from "chess.js";
-import type { EndReason, GameResult } from "../game/useChessGame";
-
-const REASONS: Record<EndReason, string> = {
-  checkmate: "by checkmate",
-  resignation: "by resignation",
-  stalemate: "Stalemate",
-  repetition: "Threefold repetition",
-  "fifty-moves": "50-move rule",
-  "insufficient-material": "Insufficient material",
-};
+import { REASONS } from "../game/endReasons";
+import type { GameResult } from "../game/useChessGame";
 
 interface Props {
   result: GameResult;

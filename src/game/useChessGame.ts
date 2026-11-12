@@ -9,7 +9,18 @@ import { chooseComputerMove } from "../engine/strength";
 import { splitUciMove } from "../engine/uci";
 import type { GameSettings } from "./settings";
 
-export type EndReason = "checkmate" | "stalemate" | "repetition" | "fifty-moves" | "insufficient-material" | "resignation";
+export type EndReason =
+  | "checkmate"
+  | "stalemate"
+  | "repetition"
+  | "fifty-moves"
+  | "insufficient-material"
+  | "resignation"
+  // Only in imported games:
+  | "timeout"
+  | "abandoned"
+  | "agreement"
+  | "timeout-vs-insufficient";
 
 export interface GameResult {
   /** null = draw */

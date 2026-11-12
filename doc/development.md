@@ -39,7 +39,7 @@ npm run preview   # serve the production build locally
 │   │   ├── strength.ts          # level → limiter, full strength or own weak bot
 │   │   ├── levels.ts            # the ten difficulty levels (name, rating, engine setting)
 │   │   ├── openingBook.ts       # standard opening lines used by the computer
-│   │   └── engines.ts           # shared engine instances (opponent/review, analyzer)
+│   │   └── engines.ts           # shared engine instances (opponent/review, analyzer, import reviewer)
 │   ├── analysis/
 │   │   ├── useAnalysis.ts       # live analysis with a 2nd, full-strength engine
 │   │   ├── format.ts            # score formatting, eval bar share, UCI → SAN lines
@@ -47,6 +47,10 @@ npm run preview   # serve the production build locally
 │   ├── review/
 │   │   ├── classify.ts          # move classes, win %, accuracy
 │   │   └── useReview.ts         # analyses every position of a finished game
+│   ├── import/
+│   │   ├── chesscom.ts          # chess.com public API: archives, monthly games, results
+│   │   ├── ImportScreen.tsx     # Import tab: username, game list, filters, review
+│   │   └── import.css
 │   ├── explain/
 │   │   └── explain.ts           # plain-language reasons for reviewed moves
 │   ├── learn/
@@ -66,9 +70,11 @@ npm run preview   # serve the production build locally
 │   ├── game/
 │   │   ├── useChessGame.ts      # game state (chess.js) + computer moves
 │   │   ├── settings.ts          # new-game settings, saved in localStorage
-│   │   └── material.ts          # captured pieces and material balance
+│   │   ├── material.ts          # captured pieces and material balance
+│   │   └── endReasons.ts        # how a game ended, as shown to the user
 │   └── components/
-│       ├── Board.tsx            # react-chessboard with tap-to-move and highlights
+│       ├── Board.tsx            # react-chessboard with tap-to-move and highlights (read-only without a game)
+│       ├── GameReview.tsx       # move-by-move review (after a game and for imports)
 │       ├── PlayerBar.tsx            # name, level/status, captured pieces
 │       ├── CapturedPieces.tsx
 │       ├── useSquareMarks.ts    # right-click square highlights (all boards)

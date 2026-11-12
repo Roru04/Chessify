@@ -12,15 +12,27 @@ interface Props {
   ply: number;
   playerColor: Color;
   onSelect: (ply: number) => void;
+  /** Column names in the summary (default "You" / "Stockfish"). */
+  names?: { you: string; opponent: string };
+  /** Another accuracy to compare with ours, e.g. chess.com's own. */
+  compareAccuracy?: { label: string; values: { w: number; b: number } } | null;
 }
 
-export function ReviewPanel({ review, history, ply, playerColor, onSelect }: Props) {
+export function ReviewPanel({
+  review,
+  history,
+  ply,
+  playerColor,
+  onSelect,
+  names = { you: "You", opponent: "Stockfish" },
+  compareAccuracy = null,
+}: Props) {
   const opp: Color = playerColor === "w" ? "b" : "w";
   const current = ply > 0 ? review.moves[ply - 1] : undefined;
   const move = ply > 0 ? history[ply - 1] : null;
   const evalAfter = review.evals[ply];
   const fmtAcc = (v: number | null) => (v === null ? "–" : v.toFixed(1));
-  const whoMoved = move ? (move.color === playerColor ? "Your move" : "Stockfish's move") : "";
+  const whoMoved = move ? (move.color === playerColor ? "Your move" : `${names.opponent}'s move`) : "";
   const moveNo = move ? `${move.before.split(" ")[5]}${move.color === "w" ? "." : "…"} ${move.san}` : "";
   const before = ply > 0 ? review.evals[ply - 1] : undefined;
   const explanation = current && move && before && evalAfter ? explainMove(move, current.verdict.cls, before, evalAfter, ply > 1 ? history[ply - 2] : null) : null;
@@ -82,8 +94,8 @@ export function ReviewPanel({ review, history, ply, playerColor, onSelect }: Pro
         <thead>
           <tr>
             <th scope="col" />
-            <th scope="col">You</th>
-            <th scope="col">Stockfish</th>
+            <th scope="col">{names.you}</th>
+            <th scope="col">{names.opponent}</th>
           </tr>
         </thead>
         <tbody>
@@ -92,6 +104,13 @@ export function ReviewPanel({ review, history, ply, playerColor, onSelect }: Pro
             <td>{fmtAcc(review.accuracy[playerColor])}</td>
             <td>{fmtAcc(review.accuracy[opp])}</td>
           </tr>
+          {compareAccuracy && (
+            <tr className="acc-compare">
+              <th scope="row">{compareAccuracy.label}</th>
+              <td>{compareAccuracy.values[playerColor].toFixed(1)}</td>
+              <td>{compareAccuracy.values[opp].toFixed(1)}</td>
+            </tr>
+          )}
           {CLASS_ORDER.map((c) => (
             <tr key={c}>
               <th scope="row">

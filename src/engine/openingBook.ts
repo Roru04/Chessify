@@ -87,6 +87,12 @@ export function bookMove(fen: string): string | null {
   return entries[entries.length - 1][0];
 }
 
+/** Is this move (UCI) one of the book's moves in this position? */
+export function isBookMove(fen: string, uci: string): boolean {
+  book ??= build();
+  return book.get(key(fen))?.has(uci) ?? false;
+}
+
 /** Number of half-moves played so far, from a FEN. */
 export function pliesFromFen(fen: string): number {
   const parts = fen.split(" ");
